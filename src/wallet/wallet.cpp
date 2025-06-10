@@ -3611,13 +3611,6 @@ bool CWallet::CreateCoinStake(ChainstateManager& chainman, const CWallet* pwalle
     CScript scriptEmpty;
     scriptEmpty.clear();
     txNew.vout.push_back(CTxOut(0, scriptEmpty));
-    // Choose coins to use
-    CAmount nBalance = GetBalance(*this).m_mine_trusted;
-    std::optional<CAmount> nReserveBalance = ParseMoney(gArgs.GetArg("-reservebalance", ""));
-    if (gArgs.IsArgSet("-reservebalance") && !nReserveBalance)
-        return error("CreateCoinStake : invalid reserve balance amount");
-    if (nBalance <= nReserveBalance)
-        return false;
     std::vector<CTransactionRef> vwtxPrev;
     CCoinControl temp;
     FastRandomContext rng_fast;
@@ -3627,7 +3620,14 @@ bool CWallet::CreateCoinStake(ChainstateManager& chainman, const CWallet* pwalle
 
     wallet::CoinsResult availableCoins = AvailableCoins(*pwallet, &temp);
 
-    CAmount nAllowedBalance = nBalance;
+    // Choose coins to use
+    CAmount nAllowedBalance = availableCoins.GetTotalAmount();
+    std::optional<CAmount> nReserveBalance = ParseMoney(gArgs.GetArg("-reservebalance", ""));
+    if (gArgs.IsArgSet("-reservebalance") && !nReserveBalance)
+        return error("CreateCoinStake : invalid reserve balance amount");
+    if (nAllowedBalance <= nReserveBalance)
+        return false;
+
     if (nReserveBalance) nAllowedBalance -= nReserveBalance.value();
 
     if (nAllowedBalance < MIN_TXOUT_AMOUNT)
