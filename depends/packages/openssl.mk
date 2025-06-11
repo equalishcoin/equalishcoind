@@ -74,7 +74,9 @@ endef
 
 define $(package)_stage_cmds
   sed -i.old "s/^INSTALLTOP=/INSTALLTOP?=/g" Makefile && \
-  $($(package)_stage_env) $(MAKE) INSTALLTOP=$($(package)_staging_dir)/$(host_prefix) install_sw
+  $($(package)_stage_env) $(MAKE) INSTALLTOP=$($(package)_staging_dir)/$(host_prefix) install_sw && \
+  find $($(package)_staging_dir)/$(host_prefix)/lib -name "*.so*" -delete 2>/dev/null || true && \
+  find $($(package)_staging_dir)/$(host_prefix)/lib -name "*.dylib*" -delete 2>/dev/null || true
 endef
 
 define $(package)_postprocess_cmds
