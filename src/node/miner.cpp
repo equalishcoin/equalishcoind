@@ -537,11 +537,14 @@ void PoSMiner(NodeContext& m_node)
     std::string strMintDisabledMessage = _("Info: Minting disabled by 'nominting' option.").translated;
     std::string strMintBlockMessage = _("Info: Minting suspended due to block creation failure.").translated;
     std::string strMintEmpty = "";
+#ifdef ENABLE_WALLET
     if (!gArgs.GetBoolArg("-minting", true) || !gArgs.GetBoolArg("-staking", true))
     {
+#endif
         strMintWarning = strMintDisabledMessage;
         LogPrintf("proof-of-stake minter disabled\n");
         return;
+#ifdef ENABLE_WALLET
     }
 
     CConnman* connman = m_node.connman.get();
@@ -707,6 +710,7 @@ void PoSMiner(NodeContext& m_node)
         LogPrintf("PeercoinMiner runtime error: %s\n", e.what());
         return;
     }
+#endif
 }
 
 // peercoin: stake minter thread

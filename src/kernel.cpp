@@ -74,6 +74,7 @@ static std::map<int, unsigned int> mapStakeModifierCheckpoints =
     (589659, 0xbd02492au )
     (714688, 0xd70a5b68u )
     (770396, 0x565fb851u )
+    (801334, 0x90485c37u )
     ;
 
 static std::map<int, unsigned int> mapStakeModifierTestnetCheckpoints =
@@ -92,6 +93,7 @@ static std::map<int, unsigned int> mapStakeModifierTestnetCheckpoints =
     (442735, 0xe42d94feu )
     (516308, 0x04a0897au )
     (573702, 0xe69df1acu )
+    (612778, 0x6be16d62u )
     ;
 
 // Whether the given coinstake is subject to new v0.3 protocol
@@ -192,8 +194,8 @@ bool IsProtocolV15(const CBlockIndex* pindexPrev)
   if (pindexPrev->nTime < (Params().NetworkIDString() != CBaseChainParams::MAIN ? nProtocolV15TestSwitchTime : nProtocolV15SwitchTime))
       return false;
 
-  if ((Params().NetworkIDString() == CBaseChainParams::MAIN && IsSuperMajority(6, pindexPrev, 750, 1000)) ||
-      (Params().NetworkIDString() != CBaseChainParams::MAIN && IsSuperMajority(6, pindexPrev, 75, 100)))
+  if ((Params().NetworkIDString() == CBaseChainParams::MAIN && pindexPrev->nHeight > 801330) ||
+      (Params().NetworkIDString() != CBaseChainParams::MAIN && pindexPrev->nHeight > 612775))
     return true;
 
   return false;

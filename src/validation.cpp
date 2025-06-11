@@ -4953,8 +4953,10 @@ bool GetCoinAge(const CTransaction& tx, const CCoinsViewCache &view, uint64_t& n
     return true;
 }
 
-// peercoin: sign block
 typedef std::vector<unsigned char> valtype;
+
+// peercoin: sign block
+#ifdef ENABLE_WALLET
 bool SignBlock(CBlock& block, const CWallet& keystore)
 {
     std::vector<valtype> vSolutions;
@@ -4986,6 +4988,7 @@ bool SignBlock(CBlock& block, const CWallet& keystore)
         return false;
     }
 }
+#endif
 
 // peercoin: check block signature
 bool CheckBlockSignature(const CBlock& block)
