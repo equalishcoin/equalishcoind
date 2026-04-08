@@ -159,10 +159,10 @@ public:
         nDefaultPort = 19901;
         m_assumed_blockchain_size = 2;
 
-        genesis = CreateGenesisBlock(1345083810, 1345084287, 2179302059u, 0x1d00ffff, 1, 0);
+        genesis = CreateGenesisBlock("EqualishCoin: perfectly balanced comma probably.", CScript(), 1775606400, 1775606400, 3848117461u, 0x1d00ffff, 1, 0);
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0x0000000032fe677166d54963b62a4677d8957e87c508eaa4fd7eb1c880cd27e3"));
-        assert(genesis.hashMerkleRoot == uint256S("0x3c2d8f85fab4d17aac558cc648a1a58acff0de6deb890c29985690052c5993c2"));
+        assert(consensus.hashGenesisBlock == uint256S("0x00000000bff3777281affbc6aa04d22330deb32aed40ece82fec0f476690ae9a"));
+        assert(genesis.hashMerkleRoot == uint256S("0x839ff6bf9d23554a35692d37fbfb27f971772b04279439f9313f0235ed0baa9f"));
 
         // Note that of those which support the service bits prefix, most only support a subset of
         // possible options.
@@ -191,7 +191,7 @@ public:
 
         checkpointData = {
             {
-                {0, uint256S("0x0000000032fe677166d54963b62a4677d8957e87c508eaa4fd7eb1c880cd27e3")},
+                {0, uint256S("0x00000000bff3777281affbc6aa04d22330deb32aed40ece82fec0f476690ae9a")},
             }
         };
 
@@ -261,10 +261,10 @@ public:
         nDefaultPort = 29901;
         m_assumed_blockchain_size = 1;
 
-        genesis = CreateGenesisBlock(1345083810, 1345090000, 122894938, 0x1d0fffff, 1, 0);
+        genesis = CreateGenesisBlock("EqualishCoin: perfectly balanced comma probably.", CScript(), 1775606400, 1775606400, 1276403458, 0x1d0fffff, 1, 0);
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0x00000001f757bb737f6596503e17cd17b0658ce630cc727c0cca81aec47c9f06"));
-        assert(genesis.hashMerkleRoot == uint256S("0x3c2d8f85fab4d17aac558cc648a1a58acff0de6deb890c29985690052c5993c2"));
+        assert(consensus.hashGenesisBlock == uint256S("0x0000000ee94aba0c4c7e7852c00faa4eaa1e33f91a665cf02959b75d93676cb3"));
+        assert(genesis.hashMerkleRoot == uint256S("0x839ff6bf9d23554a35692d37fbfb27f971772b04279439f9313f0235ed0baa9f"));
 
         vFixedSeeds.clear();
         vSeeds.clear();
@@ -291,7 +291,7 @@ public:
 
         checkpointData = {
             {
-                {0, uint256S("0x00000001f757bb737f6596503e17cd17b0658ce630cc727c0cca81aec47c9f06")},
+                {0, uint256S("0x0000000ee94aba0c4c7e7852c00faa4eaa1e33f91a665cf02959b75d93676cb3")},
             }
         };
 

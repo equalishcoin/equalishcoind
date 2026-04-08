@@ -75,9 +75,22 @@ Current values remain close to Peercoin for stability:
 
 ## Genesis status
 
-- Current fork keeps inherited Peercoin genesis blocks for main/test/regtest to preserve immediate operability
-- A dedicated genesis-regeneration pass is still recommended before public mainnet launch
-- Suggested genesis message theme: `EqualishCoin: perfectly balanced, probably.`
+- Mainnet and testnet now use unique EqualishCoin genesis blocks
+- Genesis timestamp message text: `EqualishCoin: perfectly balanced comma probably.`
+- Mainnet genesis:
+	- `nTimeTx`: `1775606400`
+	- `nTimeBlock`: `1775606400`
+	- `nBits`: `0x1d00ffff`
+	- `nNonce`: `3848117461`
+	- hash: `00000000bff3777281affbc6aa04d22330deb32aed40ece82fec0f476690ae9a`
+- Testnet genesis:
+	- `nTimeTx`: `1775606400`
+	- `nTimeBlock`: `1775606400`
+	- `nBits`: `0x1d0fffff`
+	- `nNonce`: `1276403458`
+	- hash: `0000000ee94aba0c4c7e7852c00faa4eaa1e33f91a665cf02959b75d93676cb3`
+- Shared genesis merkle root (main/test): `839ff6bf9d23554a35692d37fbfb27f971772b04279439f9313f0235ed0baa9f`
+- Signet and regtest genesis values remain inherited for now
 
 ## Supply behavior
 

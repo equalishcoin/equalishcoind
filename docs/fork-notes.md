@@ -27,6 +27,7 @@ This file tracks major changes from Peercoin in this fork pass.
 - Assigned new bech32 HRPs
 - Replaced live seed domains with explicit placeholder seed domains
 - Cleared inherited fixed seed lists for main/test
+- Replaced inherited mainnet/testnet genesis with unique EqualishCoin genesis values
 - Reduced checkpoint sets to genesis-only for clean new-network startup
 - Reset inherited chain tx stats to zeros where historical values were not fork-appropriate
 - Adjusted stake min age and maturity for hobbyist accessibility
@@ -36,7 +37,7 @@ This file tracks major changes from Peercoin in this fork pass.
 - Core PoW/PoS consensus engine design
 - Reward logic structure inherited from Peercoin
 - Deep GUI localization/translation-wide string replacement
-- Genesis regeneration (currently inherited)
+- Signet and regtest genesis values (currently inherited)
 
 ## Security posture
 
