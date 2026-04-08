@@ -39,10 +39,10 @@ if ENABLE_ZMQ
 LIBBITCOIN_ZMQ=libbitcoin_zmq.a
 endif
 if BUILD_BITCOIN_LIBS
-LIBBITCOINCONSENSUS=libpeercoinconsensus.la
+LIBBITCOINCONSENSUS=libequalishcoinconsensus.la
 endif
 if BUILD_BITCOIN_KERNEL_LIB
-LIBBITCOINKERNEL=libpeercoinkernel.la
+LIBBITCOINKERNEL=libequalishcoinkernel.la
 endif
 if ENABLE_WALLET
 LIBBITCOIN_WALLET=libbitcoin_wallet.a
@@ -85,33 +85,33 @@ EXTRA_LIBRARIES += \
   $(LIBBITCOIN_ZMQ)
 
 if BUILD_BITCOIND
-  bin_PROGRAMS += peercoind
+  bin_PROGRAMS += equalishcoind
 endif
 
 if BUILD_BITCOIN_NODE
-  bin_PROGRAMS += peercoin-node
+  bin_PROGRAMS += equalishcoin-node
 endif
 
 if BUILD_BITCOIN_CLI
-  bin_PROGRAMS += peercoin-cli
+  bin_PROGRAMS += equalishcoin-cli
 endif
 
 if BUILD_BITCOIN_TX
-  bin_PROGRAMS += peercoin-tx
+  bin_PROGRAMS += equalishcoin-tx
 endif
 
 if ENABLE_WALLET
 if BUILD_BITCOIN_WALLET
-  bin_PROGRAMS += peercoin-wallet
+  bin_PROGRAMS += equalishcoin-wallet
 endif
 endif
 
 if BUILD_BITCOIN_UTIL
-  bin_PROGRAMS += peercoin-util
+  bin_PROGRAMS += equalishcoin-util
 endif
 
 if BUILD_BITCOIN_CHAINSTATE
-  bin_PROGRAMS += peercoin-chainstate
+  bin_PROGRAMS += equalishcoin-chainstate
 endif
 
 .PHONY: FORCE check-symbols check-security
@@ -460,7 +460,7 @@ endif
 #
 
 
-# wallet: shared between peercoind and peercoin-qt, but only linked
+# wallet: shared between equalishcoind and peercoin-qt, but only linked
 # when wallet enabled
 libbitcoin_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(BOOST_CPPFLAGS) $(BDB_CPPFLAGS) $(SQLITE_CFLAGS)
 libbitcoin_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
@@ -630,7 +630,7 @@ libbitcoin_consensus_a_SOURCES = \
   version.h
 #
 
-# common: shared between peercoind, and peercoin-qt and non-server tools
+# common: shared between equalishcoind, and peercoin-qt and non-server tools
 libbitcoin_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
 libbitcoin_common_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libbitcoin_common_a_SOURCES = \
@@ -721,7 +721,7 @@ libbitcoin_util_a_SOURCES = \
   $(BITCOIN_CORE_H)
 #
 
-# cli: shared between peercoin-cli and peercoin-qt
+# cli: shared between equalishcoin-cli and peercoin-qt
 libbitcoin_cli_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
 libbitcoin_cli_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libbitcoin_cli_a_SOURCES = \
@@ -757,67 +757,67 @@ bitcoin_bin_ldadd = \
 
 bitcoin_bin_ldadd += $(BDB_LIBS) $(MINIUPNPC_LIBS) $(NATPMP_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS) $(SQLITE_LIBS) $(CRYPTO_LIBS)
 
-peercoind_SOURCES = $(bitcoin_daemon_sources) init/bitcoind.cpp
-peercoind_CPPFLAGS = $(bitcoin_bin_cppflags)
-peercoind_CXXFLAGS = $(bitcoin_bin_cxxflags)
-peercoind_LDFLAGS = $(bitcoin_bin_ldflags)
-peercoind_LDADD = $(LIBBITCOIN_NODE) $(bitcoin_bin_ldadd)
+equalishcoind_SOURCES = $(bitcoin_daemon_sources) init/bitcoind.cpp
+equalishcoind_CPPFLAGS = $(bitcoin_bin_cppflags)
+equalishcoind_CXXFLAGS = $(bitcoin_bin_cxxflags)
+equalishcoind_LDFLAGS = $(bitcoin_bin_ldflags)
+equalishcoind_LDADD = $(LIBBITCOIN_NODE) $(bitcoin_bin_ldadd)
 
-peercoin_node_SOURCES = $(bitcoin_daemon_sources) init/bitcoin-node.cpp
-peercoin_node_CPPFLAGS = $(bitcoin_bin_cppflags)
-peercoin_node_CXXFLAGS = $(bitcoin_bin_cxxflags)
-peercoin_node_LDFLAGS = $(bitcoin_bin_ldflags)
-peercoin_node_LDADD = $(LIBBITCOIN_NODE) $(bitcoin_bin_ldadd) $(LIBBITCOIN_IPC) $(LIBMULTIPROCESS_LIBS)
+equalishcoin_node_SOURCES = $(bitcoin_daemon_sources) init/bitcoin-node.cpp
+equalishcoin_node_CPPFLAGS = $(bitcoin_bin_cppflags)
+equalishcoin_node_CXXFLAGS = $(bitcoin_bin_cxxflags)
+equalishcoin_node_LDFLAGS = $(bitcoin_bin_ldflags)
+equalishcoin_node_LDADD = $(LIBBITCOIN_NODE) $(bitcoin_bin_ldadd) $(LIBBITCOIN_IPC) $(LIBMULTIPROCESS_LIBS)
 
-# peercoin-cli binary #
-peercoin_cli_SOURCES = bitcoin-cli.cpp
-peercoin_cli_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(EVENT_CFLAGS)
-peercoin_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-peercoin_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
+# equalishcoin-cli binary #
+equalishcoin_cli_SOURCES = bitcoin-cli.cpp
+equalishcoin_cli_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(EVENT_CFLAGS)
+equalishcoin_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+equalishcoin_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
 
 if TARGET_WINDOWS
-peercoin_cli_SOURCES += bitcoin-cli-res.rc
+equalishcoin_cli_SOURCES += bitcoin-cli-res.rc
 endif
 
-peercoin_cli_LDADD = \
+equalishcoin_cli_LDADD = \
   $(LIBBITCOIN_CLI) \
   $(LIBUNIVALUE) \
   $(LIBBITCOIN_COMMON) \
   $(LIBBITCOIN_UTIL) \
   $(LIBBITCOIN_CRYPTO)
 
-peercoin_cli_LDADD += $(CRYPTO_LIBS) $(EVENT_LIBS)
+equalishcoin_cli_LDADD += $(CRYPTO_LIBS) $(EVENT_LIBS)
 #
 
-# peercoin-tx binary #
-peercoin_tx_SOURCES = \
+# equalishcoin-tx binary #
+equalishcoin_tx_SOURCES = \
   bitcoin-tx.cpp \
   timedatadummy.cpp
-peercoin_tx_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-peercoin_tx_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-peercoin_tx_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
+equalishcoin_tx_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+equalishcoin_tx_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+equalishcoin_tx_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
 
 if TARGET_WINDOWS
-peercoin_tx_SOURCES += bitcoin-tx-res.rc
+equalishcoin_tx_SOURCES += bitcoin-tx-res.rc
 endif
 
-peercoin_tx_LDADD = \
+equalishcoin_tx_LDADD = \
   $(LIBUNIVALUE) \
   $(LIBBITCOIN_COMMON) \
   $(LIBBITCOIN_UTIL) \
   $(LIBBITCOIN_CONSENSUS) \
   $(LIBBITCOIN_CRYPTO) \
   $(LIBSECP256K1)
-peercoin_tx_LDADD += $(CRYPTO_LIBS)
+equalishcoin_tx_LDADD += $(CRYPTO_LIBS)
 #
 
 # bitcoin-wallet binary #
-peercoin_wallet_SOURCES = bitcoin-wallet.cpp
-peercoin_wallet_SOURCES += init/bitcoin-wallet.cpp
-peercoin_wallet_CPPFLAGS = $(bitcoin_bin_cppflags)
-peercoin_wallet_CXXFLAGS = $(bitcoin_bin_cxxflags)
-peercoin_wallet_LDFLAGS = $(bitcoin_bin_ldflags)
-peercoin_wallet_LDADD = \
+equalishcoin_wallet_SOURCES = bitcoin-wallet.cpp
+equalishcoin_wallet_SOURCES += init/bitcoin-wallet.cpp
+equalishcoin_wallet_CPPFLAGS = $(bitcoin_bin_cppflags)
+equalishcoin_wallet_CXXFLAGS = $(bitcoin_bin_cxxflags)
+equalishcoin_wallet_LDFLAGS = $(bitcoin_bin_ldflags)
+equalishcoin_wallet_LDADD = \
   $(LIBBITCOIN_WALLET_TOOL) \
   $(LIBBITCOIN_WALLET) \
   $(LIBBITCOIN_NODE) \
@@ -836,21 +836,21 @@ peercoin_wallet_LDADD = \
   $(CRYPTO_LIBS)
 
 if TARGET_WINDOWS
-peercoin_wallet_SOURCES += bitcoin-wallet-res.rc
+equalishcoin_wallet_SOURCES += bitcoin-wallet-res.rc
 endif
 #
 
 # bitcoin-util binary #
-peercoin_util_SOURCES = bitcoin-util.cpp
-peercoin_util_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-peercoin_util_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-peercoin_util_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
+equalishcoin_util_SOURCES = bitcoin-util.cpp
+equalishcoin_util_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+equalishcoin_util_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+equalishcoin_util_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
 
 if TARGET_WINDOWS
-peercoin_util_SOURCES += bitcoin-util-res.rc
+equalishcoin_util_SOURCES += bitcoin-util-res.rc
 endif
 
-peercoin_util_LDADD = \
+equalishcoin_util_LDADD = \
   $(LIBBITCOIN_COMMON) \
   $(LIBBITCOIN_UTIL) \
   $(LIBUNIVALUE) \
@@ -861,38 +861,38 @@ peercoin_util_LDADD = \
 
 
 # bitcoin-chainstate binary #
-peercoin_chainstate_SOURCES = bitcoin-chainstate.cpp
-peercoin_chainstate_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(BOOST_CPPFLAGS)
-peercoin_chainstate_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+equalishcoin_chainstate_SOURCES = bitcoin-chainstate.cpp
+equalishcoin_chainstate_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(BOOST_CPPFLAGS)
+equalishcoin_chainstate_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 
-peercoin_chainstate_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(PTHREAD_FLAGS) $(LIBTOOL_APP_LDFLAGS) -static
-peercoin_chainstate_LDADD = $(LIBBITCOINKERNEL)
+equalishcoin_chainstate_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(PTHREAD_FLAGS) $(LIBTOOL_APP_LDFLAGS) -static
+equalishcoin_chainstate_LDADD = $(LIBBITCOINKERNEL)
 
 # libtool is unable to calculate this indirect dependency, presumably because it's a subproject.
 # libsecp256k1 only needs to be linked in when libbitcoinkernel is static.
-peercoin_chainstate_LDADD += $(LIBSECP256K1)
+equalishcoin_chainstate_LDADD += $(LIBSECP256K1)
 #
 
 # peercoinkernel library #
 if BUILD_BITCOIN_KERNEL_LIB
 lib_LTLIBRARIES += $(LIBBITCOINKERNEL)
 
-libpeercoinkernel_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS) $(PTHREAD_FLAGS)
-libpeercoinkernel_la_LIBADD = $(LIBBITCOIN_CRYPTO) $(LIBUNIVALUE) $(LIBLEVELDB) $(LIBMEMENV) $(LIBSECP256K1)
-libpeercoinkernel_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_BITCOIN_INTERNAL $(BOOST_CPPFLAGS) $(LEVELDB_CPPFLAGS) -I$(srcdir)/$(UNIVALUE_INCLUDE_DIR_INT)
+libequalishcoinkernel_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS) $(PTHREAD_FLAGS)
+libequalishcoinkernel_la_LIBADD = $(LIBBITCOIN_CRYPTO) $(LIBUNIVALUE) $(LIBLEVELDB) $(LIBMEMENV) $(LIBSECP256K1)
+libequalishcoinkernel_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_BITCOIN_INTERNAL $(BOOST_CPPFLAGS) $(LEVELDB_CPPFLAGS) -I$(srcdir)/$(UNIVALUE_INCLUDE_DIR_INT)
 
-# libpeercoinkernel requires default symbol visibility, explicitly specify that
+# libequalishcoinkernel requires default symbol visibility, explicitly specify that
 # here so that things still work even when user configures with
 #   --enable-reduce-exports
 #
 # Note this is a quick hack that will be removed as we incrementally define what
 # to export from the library.
-libpeercoinkernel_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) -fvisibility=default
+libequalishcoinkernel_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) -fvisibility=default
 
-# TODO: libpeercoinkernel is a work in progress consensus engine library, as more
+# TODO: libequalishcoinkernel is a work in progress consensus engine library, as more
 #       and more modules are decoupled from the consensus engine, this list will
 #       shrink to only those which are absolutely necessary.
-libpeercoinkernel_la_SOURCES = \
+libequalishcoinkernel_la_SOURCES = \
   kernel/bitcoinkernel.cpp \
   arith_uint256.cpp \
   chain.cpp \
@@ -975,7 +975,7 @@ libpeercoinkernel_la_SOURCES = \
 
 # Required for obj/build.h to be generated first.
 # More details: https://www.gnu.org/software/automake/manual/html_node/Built-Sources-Example.html
-libpeercoinkernel_la-clientversion.l$(OBJEXT): obj/build.h
+libequalishcoinkernel_la-clientversion.l$(OBJEXT): obj/build.h
 endif # BUILD_BITCOIN_KERNEL_LIB
 #
 
@@ -984,12 +984,12 @@ if BUILD_BITCOIN_LIBS
 lib_LTLIBRARIES += $(LIBBITCOINCONSENSUS)
 
 include_HEADERS = script/bitcoinconsensus.h
-libpeercoinconsensus_la_SOURCES = support/cleanse.cpp $(crypto_libbitcoin_crypto_base_la_SOURCES) $(libbitcoin_consensus_a_SOURCES)
+libequalishcoinconsensus_la_SOURCES = support/cleanse.cpp $(crypto_libbitcoin_crypto_base_la_SOURCES) $(libbitcoin_consensus_a_SOURCES)
 
-libpeercoinconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS)
-libpeercoinconsensus_la_LIBADD = $(LIBSECP256K1)
-libpeercoinconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_BITCOIN_INTERNAL
-libpeercoinconsensus_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libequalishcoinconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS)
+libequalishcoinconsensus_la_LIBADD = $(LIBSECP256K1)
+libequalishcoinconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_BITCOIN_INTERNAL
+libequalishcoinconsensus_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 
 endif
 #

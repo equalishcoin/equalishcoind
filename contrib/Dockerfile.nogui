@@ -1,0 +1,77 @@
+FROM debian:bookworm-slim@sha256:02274f94f52336abd6ab4a8471ea09966613910ebaeed622429dc7b4b780e804 AS builder
+
+ARG MAKE_JOBS=1
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    git \
+    curl \
+    pkg-config \
+    libtool \
+    autoconf \
+    autotools-dev \
+    automake \
+    binutils \
+    build-essential \
+    bsdextrautils \
+    python3 \
+    libevent-dev \
+    libboost-dev \
+    libsqlite3-dev \
+    libminiupnpc-dev \
+    libnatpmp-dev \
+    libzmq3-dev \
+    systemtap-sdt-dev \
+    libqrencode-dev \
+    libdb-dev \
+    libdb++-dev \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+COPY . /src
+RUN ./autogen.sh \
+ && mkdir -p build \
+ && cd build \
+ && ../configure --without-gui --disable-tests --disable-bench --enable-wallet --with-incompatible-bdb --without-miniupnpc \
+ && make -j"${MAKE_JOBS}" \
+ && strip --strip-unneeded \
+     ./src/equalishcoind \
+     ./src/equalishcoin-cli \
+     ./src/equalishcoin-tx \
+     ./src/equalishcoin-wallet
+
+
+FROM debian:bookworm-slim@sha256:02274f94f52336abd6ab4a8471ea09966613910ebaeed622429dc7b4b780e804
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    gosu \
+    bash \
+    curl \
+    libevent-dev \
+    libboost-dev \
+    libsqlite3-dev \
+    libminiupnpc-dev \
+    libnatpmp1 \
+    libzmq5 \
+    libdb-dev \
+    libdb++-dev \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -m -u 1000 -s /bin/bash equalishcoin
+
+WORKDIR /opt/equalishcoin
+
+COPY --from=builder --chmod=755 /src/build/src/equalishcoind /usr/local/bin/equalishcoind
+COPY --from=builder --chmod=755 /src/build/src/equalishcoin-cli /usr/local/bin/equalishcoin-cli
+COPY --from=builder --chmod=755 /src/build/src/equalishcoin-tx /usr/local/bin/equalishcoin-tx
+COPY --from=builder --chmod=755 /src/build/src/equalishcoin-wallet /usr/local/bin/equalishcoin-wallet
+
+COPY --chmod=755 contrib/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["equalishcoind"]

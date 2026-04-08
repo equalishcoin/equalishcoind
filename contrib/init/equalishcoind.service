@@ -1,0 +1,46 @@
+# It is not recommended to modify this file in-place, because it will
+# be overwritten during package upgrades. If you want to add further
+# options or overwrite existing ones then use
+# $ systemctl edit equalishcoind.service
+# See "man systemd.service" for details.
+
+# Note that almost all daemon options could be specified in
+# /etc/equalishcoin/equalishcoin.conf, but keep in mind those explicitly
+# specified as arguments in ExecStart= will override those in the
+# config file.
+
+[Unit]
+Description=EqualishCoin daemon
+Documentation=https://github.com/equalishcoin/equalishcoin/blob/master/doc/init.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/bin/equalishcoind -daemonwait \
+                            -pid=/run/equalishcoind/equalishcoind.pid \
+                            -conf=/etc/equalishcoin/equalishcoin.conf \
+                            -datadir=/var/lib/equalishcoind
+PermissionsStartOnly=true
+ExecStartPre=/bin/chgrp equalishcoin /etc/equalishcoin
+Type=forking
+PIDFile=/run/equalishcoind/equalishcoind.pid
+Restart=on-failure
+TimeoutStartSec=infinity
+TimeoutStopSec=600
+User=equalishcoin
+Group=equalishcoin
+RuntimeDirectory=equalishcoind
+RuntimeDirectoryMode=0710
+ConfigurationDirectory=equalishcoin
+ConfigurationDirectoryMode=0710
+StateDirectory=equalishcoind
+StateDirectoryMode=0710
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+NoNewPrivileges=true
+PrivateDevices=true
+MemoryDenyWriteExecute=true
+
+[Install]
+WantedBy=multi-user.target

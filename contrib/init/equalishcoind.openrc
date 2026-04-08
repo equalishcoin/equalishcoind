@@ -1,0 +1,43 @@
+#!/sbin/openrc-run
+
+if [ -d "/var/lib/equalishcoin/.equalishcoin" ]; then
+	EQUALISHCOIND_DEFAULT_DATADIR="/var/lib/equalishcoin/.equalishcoin"
+else
+	EQUALISHCOIND_DEFAULT_DATADIR="/var/lib/equalishcoind"
+fi
+
+EQUALISHCOIND_CONFIGFILE=${EQUALISHCOIND_CONFIGFILE:-/etc/equalishcoin/equalishcoin.conf}
+EQUALISHCOIND_PIDDIR=${EQUALISHCOIND_PIDDIR:-/var/run/equalishcoind}
+EQUALISHCOIND_PIDFILE=${EQUALISHCOIND_PIDFILE:-${EQUALISHCOIND_PIDDIR}/equalishcoind.pid}
+EQUALISHCOIND_DATADIR=${EQUALISHCOIND_DATADIR:-${EQUALISHCOIND_DEFAULT_DATADIR}}
+EQUALISHCOIND_USER=${EQUALISHCOIND_USER:-equalishcoin}
+EQUALISHCOIND_GROUP=${EQUALISHCOIND_GROUP:-equalishcoin}
+EQUALISHCOIND_BIN=${EQUALISHCOIND_BIN:-/usr/bin/equalishcoind}
+EQUALISHCOIND_NICE=${EQUALISHCOIND_NICE:-0}
+EQUALISHCOIND_OPTS="${EQUALISHCOIND_OPTS:-}"
+
+name="EqualishCoin Daemon"
+description="EqualishCoin hybrid PoW/PoS network daemon"
+
+command="/usr/bin/equalishcoind"
+command_args="-pid=\"${EQUALISHCOIND_PIDFILE}\" \
+		-conf=\"${EQUALISHCOIND_CONFIGFILE}\" \
+		-datadir=\"${EQUALISHCOIND_DATADIR}\" \
+		-daemon \
+		${EQUALISHCOIND_OPTS}"
+
+required_files="${EQUALISHCOIND_CONFIGFILE}"
+start_stop_daemon_args="-u ${EQUALISHCOIND_USER} \
+			-N ${EQUALISHCOIND_NICE} -w 2000"
+pidfile="${EQUALISHCOIND_PIDFILE}"
+retry="${EQUALISHCOIND_SIGTERM_TIMEOUT}"
+
+depend() {
+	need localmount net
+}
+
+start_pre() {
+	checkpath -d --mode 0750 --owner "${EQUALISHCOIND_USER}:${EQUALISHCOIND_GROUP}" "${EQUALISHCOIND_DATADIR}"
+	checkpath -d --mode 0755 --owner "${EQUALISHCOIND_USER}:${EQUALISHCOIND_GROUP}" "${EQUALISHCOIND_PIDDIR}"
+	checkpath -f -o "${EQUALISHCOIND_USER}:${EQUALISHCOIND_GROUP}" -m 0660 "${EQUALISHCOIND_CONFIGFILE}"
+}

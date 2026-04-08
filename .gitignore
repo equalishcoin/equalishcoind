@@ -16,6 +16,14 @@ src/peercoin-node
 src/peercoin-tx
 src/peercoin-util
 src/peercoin-wallet
+src/equalishcoin
+src/equalishcoind
+src/equalishcoin-cli
+src/equalishcoin-gui
+src/equalishcoin-node
+src/equalishcoin-tx
+src/equalishcoin-util
+src/equalishcoin-wallet
 src/test/fuzz/fuzz
 src/test/test_peercoin
 src/qt/test/test_peercoin-qt
@@ -113,8 +121,10 @@ src/qt/bitcoin-qt.includes
 Makefile
 !depends/Makefile
 src/qt/peercoin-qt
+src/qt/equalishcoin-qt
 PPCoin-Qt.app
 Peercoin-Qt.app
+EqualishCoin-Qt.app
 
 # Qt Creator
 Makefile.am.user

@@ -1,0 +1,42 @@
+services:
+  equalishcoind:
+    platform: linux/amd64
+    build:
+      context: ..
+      dockerfile: contrib/Dockerfile.nogui
+      args:
+        MAKE_JOBS: "4"
+    container_name: equalishcoind
+    restart: unless-stopped
+    environment:
+      EQUALISHCOIN_DATA_DIR: /home/equalishcoin/.equalishcoin
+      EQUALISHCOIN_CONF: /home/equalishcoin/.equalishcoin/equalishcoin.conf
+      COIND_RPC_USER: "${COIND_RPC_USER:-eqlsrpc}"
+      COIND_RPC_PASSWORD: "${COIND_RPC_PASSWORD:-change-me-now}"
+      COIND_P2P_PORT: "${COIND_P2P_PORT:-19901}"
+      COIND_RPC_PORT: "${COIND_RPC_PORT:-19902}"
+      COIND_RPC_BIND: "${COIND_RPC_BIND:-0.0.0.0}"
+      COIND_RPC_ALLOW_IP: "${COIND_RPC_ALLOW_IP:-0.0.0.0/0}"
+      COIND_TXINDEX: "${COIND_TXINDEX:-1}"
+      COIND_PRUNE: "${COIND_PRUNE:-0}"
+      COIND_MAXCONNECTIONS: "${COIND_MAXCONNECTIONS:-64}"
+      COIND_EXTRA_ARGS: "${COIND_EXTRA_ARGS:-}"
+    ports:
+      - "${COIND_P2P_PORT:-19901}:${COIND_P2P_PORT:-19901}"
+      # Uncomment only if you really want host RPC access.
+      # - "${COIND_RPC_PORT:-19902}:${COIND_RPC_PORT:-19902}"
+    expose:
+      - "${COIND_P2P_PORT:-19901}"
+      - "${COIND_RPC_PORT:-19902}"
+    volumes:
+      - ./dot-equalishcoin:/home/equalishcoin/.equalishcoin
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS --user \"$${COIND_RPC_USER}:$${COIND_RPC_PASSWORD}\" --data-binary '{\"jsonrpc\":\"1.0\",\"id\":\"health\",\"method\":\"getblockchaininfo\",\"params\":[]}' -H 'content-type: text/plain;' http://127.0.0.1:$${COIND_RPC_PORT}/ >/dev/null"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 20
+      start_period: 120s
