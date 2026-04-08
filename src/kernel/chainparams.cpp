@@ -118,10 +118,10 @@ public:
         consensus.nStakeTargetSpacing = 10 * 60; // 10-minute block spacing
         consensus.nTargetSpacingWorkMax = 12 * consensus.nStakeTargetSpacing; // 2-hour
         consensus.nPowTargetSpacing = consensus.nStakeTargetSpacing;
-        consensus.nStakeMinAge = 60 * 60 * 24 * 30; // minimum age for coin age
+        consensus.nStakeMinAge = 60 * 60 * 24 * 14; // minimum age for coin age
         consensus.nStakeMaxAge = 60 * 60 * 24 * 90;
         consensus.nModifierInterval = 6 * 60 * 60; // Modifier interval: time to elapse before new modifier is computed
-        consensus.nCoinbaseMaturity = 500;
+        consensus.nCoinbaseMaturity = 240;
 
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
@@ -130,19 +130,19 @@ public:
 
         consensus.SegwitHeight = 455470;
 
-        consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000000006c0ada6e6d2117"); // 750000
-        consensus.defaultAssumeValid = uint256S("0xd5dce1eaccc3f4894ae235123ebea393d74c1ddd1aaa4d8c7a814a1ba0b69ad4");  // 750000
+        consensus.nMinimumChainWork = uint256{};
+        consensus.defaultAssumeValid = uint256{};
 
         /**
          * The message start string is designed to be unlikely to occur in normal data.
          * The characters are rarely used upper ASCII, not valid as UTF-8, and produce
          * a large 32-bit integer with any alignment.
          */
-        pchMessageStart[0] = 0xe6;
-        pchMessageStart[1] = 0xe8;
-        pchMessageStart[2] = 0xe9;
-        pchMessageStart[3] = 0xe5;
-        nDefaultPort = 9901;
+        pchMessageStart[0] = 0xf7;
+        pchMessageStart[1] = 0xc1;
+        pchMessageStart[2] = 0xee;
+        pchMessageStart[3] = 0x50;
+        nDefaultPort = 19901;
         m_assumed_blockchain_size = 2;
 
         genesis = CreateGenesisBlock(1345083810, 1345084287, 2179302059u, 0x1d00ffff, 1, 0);
@@ -155,21 +155,19 @@ public:
         // This is fine at runtime as we'll fall back to using them as an addrfetch if they don't support the
         // service bits we want, but we should get them updated to support all service bits wanted by any
         // release ASAP to avoid it where possible.
-        vSeeds.emplace_back("seed.peercoin.net");
-        vSeeds.emplace_back("seed2.peercoin.net");
-        vSeeds.emplace_back("seed.peercoin-library.org");
-        vSeeds.emplace_back("seed.ppcoin.info");
+        vSeeds.emplace_back("seed1.equalishcoin.invalid");
+        vSeeds.emplace_back("seed2.equalishcoin.invalid");
 
-        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,55);  // peercoin: addresses begin with 'P'
-        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,117); // peercoin: addresses begin with 'p'
-        base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,183);
+        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,33);
+        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,28);
+        base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,161);
         base58Prefixes[EXT_PUBLIC_KEY] = {0x04, 0x88, 0xB2, 0x1E};
         base58Prefixes[EXT_SECRET_KEY] = {0x04, 0x88, 0xAD, 0xE4};
 
         // human readable prefix to bench32 address
-        bech32_hrp = "pc";
+        bech32_hrp = "eqls";
 
-        vFixedSeeds = std::vector<uint8_t>(std::begin(chainparams_seed_main), std::end(chainparams_seed_main));
+        vFixedSeeds.clear();
 
         fMiningRequiresPeers = true;
         fDefaultConsistencyChecks = false;
@@ -179,22 +177,7 @@ public:
 
         checkpointData = {
             {
-                {     0, uint256S("0x0000000032fe677166d54963b62a4677d8957e87c508eaa4fd7eb1c880cd27e3")},
-                { 19080, uint256S("0x000000000000bca54d9ac17881f94193fd6a270c1bb21c3bf0b37f588a40dbd7")},
-                { 30583, uint256S("0xd39d1481a7eecba48932ea5913be58ad3894c7ee6d5a8ba8abeb772c66a6696e")},
-                { 99999, uint256S("0x27fd5e1de16a4270eb8c68dee2754a64da6312c7c3a0e99a7e6776246be1ee3f")},
-                {219999, uint256S("0xab0dad4b10d2370f009ed6df6effca1ba42f01d5070d6b30afeedf6463fbe7a2")},
-                {336000, uint256S("0x4d261cef6e61a5ed8325e560f1d6e36f4698853a4c7134677f47a1d1d842bdf6")},
-                {371850, uint256S("0x6b18adcb0a6e080dae85b74eee2b83fabb157bbea64fab0ed2192b2f6d5b89f3")},
-                {407813, uint256S("0x00000000000000012730b0f48bed8afbeb08164c9d63597afb082e82ea05cec9")},
-                {443561, uint256S("0xf81cea8e4e40b2cfcc13a8bd82436399c35a55df951b95e7128601c1838029ed")},
-                {455470, uint256S("0xd1472c26229f90b8589d331aa47ba9023cb953b92dce342c753e7a6b3431bf1e")},
-                {479189, uint256S("0xc9c065028b20a23fbb9627bbca5946c7497f11e1f72433d4d215c79047cf06f2")},
-                {504051, uint256S("0xff65454ebdf1d89174bec10a3c016db92f7b1d9a4759603472842f254be8d7b3")},
-                {589659, uint256S("0x967c14abf21214639aeff0a270c4543cd3b80fe53178384ac5aa3c277662f1d0")},
-                {714688, uint256S("0x0000000000000000bef29f005dc65af3950b14af7200998759ba8977561f9d95")},
-                {770396, uint256S("0x0fc7bf7f0e830eea0bc367c76f9dcfc70d42d5625d93b056354dc23049de6e29")},
-                {801334, uint256S("0x4cf53c51bbefa0a4c30a73609ab115276e33e9e696ea056f46e9ead36d4209b1")},
+                {0, uint256S("0x0000000032fe677166d54963b62a4677d8957e87c508eaa4fd7eb1c880cd27e3")},
             }
         };
 
@@ -203,12 +186,9 @@ public:
         };
 
         chainTxData = ChainTxData{
-            // Data as of block 4cf53c51bbefa0a4c30a73609ab115276e33e9e696ea056f46e9ead36d4209b1 (height 801334).
-            1743098457, // * UNIX timestamp of last known number of transactions
-            2618324,    // * total number of transactions between genesis and that timestamp
-                        //   (the tx=... number in the ChainStateFlushed debug.log lines)
-            0.006583698 // * estimated number of transactions per second after that timestamp
-                        //   2618324/(1743098457-1345400356) = 0.006583698
+            0,
+            0,
+            0,
         };
     }
 };
@@ -246,11 +226,11 @@ public:
         consensus.nMinimumChainWork = uint256S("0x00000000000000000000000000000000000000000000000000a39348f70f067a");  // 500000
         consensus.defaultAssumeValid = uint256S("0xa40f64181ee4a3bedda2eae0107d9da0e049fe285b6e6e2a7f1f11697f22c7ed"); // 500000
 
-        pchMessageStart[0] = 0xcb;
-        pchMessageStart[1] = 0xf2;
-        pchMessageStart[2] = 0xc0;
-        pchMessageStart[3] = 0xef;
-        nDefaultPort = 9903;
+        pchMessageStart[0] = 0xce;
+        pchMessageStart[1] = 0xfa;
+        pchMessageStart[2] = 0x51;
+        pchMessageStart[3] = 0x10;
+        nDefaultPort = 29901;
         m_assumed_blockchain_size = 1;
 
         genesis = CreateGenesisBlock(1345083810, 1345090000, 122894938, 0x1d0fffff, 1, 0);
@@ -261,21 +241,19 @@ public:
         vFixedSeeds.clear();
         vSeeds.clear();
         // nodes with support for servicebits filtering should be at the top
-        vSeeds.emplace_back("tseed.peercoin.net");
-        vSeeds.emplace_back("tseed2.peercoin.net");
-        vSeeds.emplace_back("tseed.peercoin-library.org");
-        vSeeds.emplace_back("testseed.ppcoin.info");
+        vSeeds.emplace_back("testseed1.equalishcoin.invalid");
+        vSeeds.emplace_back("testseed2.equalishcoin.invalid");
 
-        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,111);
+        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,65);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,196);
         base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,239);
         base58Prefixes[EXT_PUBLIC_KEY] = {0x04, 0x35, 0x87, 0xCF};
         base58Prefixes[EXT_SECRET_KEY] = {0x04, 0x35, 0x83, 0x94};
 
         // human readable prefix to bench32 address
-        bech32_hrp = "tpc";
+        bech32_hrp = "teqls";
 
-        vFixedSeeds = std::vector<uint8_t>(std::begin(chainparams_seed_test), std::end(chainparams_seed_test));
+        vFixedSeeds.clear();
 
         fMiningRequiresPeers = true;
         fDefaultConsistencyChecks = false;
@@ -285,21 +263,7 @@ public:
 
         checkpointData = {
             {
-                {     0, uint256S("0x00000001f757bb737f6596503e17cd17b0658ce630cc727c0cca81aec47c9f06")},
-                { 19080, uint256S("0xb054d63d41852d71b611eaa8eca37d9fddca69b5013cf0966d453402ec8005ce")},
-                { 30583, uint256S("0x5179c0c496b5d25ab81ffe14273ea6928c6ff81c0a0d6a83b5d7d41d64886300")},
-                { 99999, uint256S("0xa7b03b14b8673683d972ab81775f3e85fea4fe689874b5956183466535dc651c")},
-                {219999, uint256S("0x0691bb86c92762c5c4c5a3723585ebeb7ec59310bbb0bdb6666551ab24ad919e")},
-                {336000, uint256S("0xf07adf61615c529f7c282b858d13d3e037b197324cb12e0669c461947494c4e3")},
-                {372751, uint256S("0x000000000000148db599b217c117b5104f5043c55f6ca2a8a065d9fab9f9bba1")},
-                {382019, uint256S("0x3ab75769d7957d9bf0857b5019d0a0e41044fa9ecf30b2f9c32aa457b0864ce5")},
-                {408500, uint256S("0x1636ac08b073d26b28fa40243d58dd5deb215752efe094c92c61998e4e9baf3f")},
-                {412691, uint256S("0x0e20318be88f07f521453435b37cfc516c3de07264a78ed7170985a1126126ab")},
-                {441299, uint256S("0x4091d0836a37c50ceee876000ac0cb251fd10031dab901d2c0677cd86283096e")},
-                {442735, uint256S("0x1b83b33894d51be0b8b323bfab093f638915236e0e40ba3b52bb33fdbc4053cd")},
-                {516308, uint256S("0x0000000ed333c5fa4be2c941f3c3a0680c3a7d582cbf74f4516f8503474e2585")},
-                {573702, uint256S("0xc41259778268fe3bba597c7707fe400d9a7d66b4d6d2a9593c898fd69fb56a5f")},
-                {612778, uint256S("0x00000003216118fab90ea268ce526e1fcce67dc97b74c5b62119cc3d244d8f71")},
+                {0, uint256S("0x00000001f757bb737f6596503e17cd17b0658ce630cc727c0cca81aec47c9f06")},
             }
         };
 
@@ -308,12 +272,9 @@ public:
         };
 
         chainTxData = ChainTxData{
-            // Data as of block 00000003216118fab90ea268ce526e1fcce67dc97b74c5b62119cc3d244d8f71 (height 612778)
-            1739494055, // * UNIX timestamp of last known number of transactions
-            1221679,    // * total number of transactions between genesis and that timestamp
-                        //   (the tx=... number in the SetBestChain debug.log lines)
-            0.003104928 // * estimated number of transactions per second after that timestamp
-                        //   1221679/(1739494055-1346029522) = 0.003104928
+            0,
+            0,
+            0,
 
         };
     }
@@ -401,7 +362,7 @@ public:
         uint256 hash = h.GetHash();
         memcpy(pchMessageStart, hash.begin(), 4);
 
-        nDefaultPort = 38333;
+        nDefaultPort = 39333;
 
         genesis = CreateGenesisBlock(1345083810, 1345090000, 122894938, 0x1d0fffff, 1, 0);
         consensus.hashGenesisBlock = genesis.GetHash();
@@ -410,13 +371,13 @@ public:
 
         vFixedSeeds.clear();
 
-        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,111);
+        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,65);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,196);
         base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,239);
         base58Prefixes[EXT_PUBLIC_KEY] = {0x04, 0x35, 0x87, 0xCF};
         base58Prefixes[EXT_SECRET_KEY] = {0x04, 0x35, 0x83, 0x94};
 
-        bech32_hrp = "tb";
+        bech32_hrp = "seqls";
 
         fDefaultConsistencyChecks = false;
         fRequireStandard = true;
@@ -476,11 +437,11 @@ public:
         consensus.nMinimumChainWork = uint256{};
         consensus.defaultAssumeValid = uint256{};
 
-        pchMessageStart[0] = 0xcb;
-        pchMessageStart[1] = 0xf2;
-        pchMessageStart[2] = 0xc0;
-        pchMessageStart[3] = 0xef;
-        nDefaultPort = 9903;
+        pchMessageStart[0] = 0xfa;
+        pchMessageStart[1] = 0xce;
+        pchMessageStart[2] = 0x51;
+        pchMessageStart[3] = 0x1a;
+        nDefaultPort = 39901;
         m_assumed_blockchain_size = 0;
         m_assumed_chain_state_size = 0;
 
@@ -550,13 +511,13 @@ public:
             0
         };
 
-        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,111);
+        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,65);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,196);
         base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,239);
         base58Prefixes[EXT_PUBLIC_KEY] = {0x04, 0x35, 0x87, 0xCF};
         base58Prefixes[EXT_SECRET_KEY] = {0x04, 0x35, 0x83, 0x94};
 
-        bech32_hrp = "pcrt";
+        bech32_hrp = "reqls";
     }
 };
 

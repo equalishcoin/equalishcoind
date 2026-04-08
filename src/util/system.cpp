@@ -56,7 +56,7 @@
 // Application startup time (used for uptime calculation)
 const int64_t nStartupTime = GetTime();
 
-const char * const BITCOIN_CONF_FILENAME = "peercoin.conf";
+const char * const BITCOIN_CONF_FILENAME = "equalishcoin.conf";
 const char * const BITCOIN_SETTINGS_FILENAME = "settings.json";
 
 ArgsManager gArgs;
@@ -711,13 +711,13 @@ std::string HelpMessageOpt(const std::string &option, const std::string &message
 
 fs::path GetDefaultDataDir()
 {
-    // Windows < Vista: C:\Documents and Settings\Username\Application Data\Peercoin
-    // Windows >= Vista: C:\Users\Username\AppData\Roaming\Peercoin
-    // Mac: ~/Library/Application Support/Peercoin
-    // Unix: ~/.peercoin
+    // Windows < Vista: C:\Documents and Settings\Username\Application Data\EqualishCoin
+    // Windows >= Vista: C:\Users\Username\AppData\Roaming\EqualishCoin
+    // Mac: ~/Library/Application Support/EqualishCoin
+    // Unix: ~/.equalishcoin
 #ifdef WIN32
     // Windows
-    return GetSpecialFolderPath(CSIDL_APPDATA) / "Peercoin";
+    return GetSpecialFolderPath(CSIDL_APPDATA) / "EqualishCoin";
 #else
     fs::path pathRet;
     char* pszHome = getenv("HOME");
@@ -727,10 +727,10 @@ fs::path GetDefaultDataDir()
         pathRet = fs::path(pszHome);
 #ifdef MAC_OSX
     // Mac
-    return pathRet / "Library/Application Support/Peercoin";
+    return pathRet / "Library/Application Support/EqualishCoin";
 #else
     // Unix
-    return pathRet / ".peercoin";
+    return pathRet / ".equalishcoin";
 #endif
 #endif
 }

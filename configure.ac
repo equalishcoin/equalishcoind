@@ -6,13 +6,13 @@ define(_CLIENT_VERSION_RC, 0)
 define(_CLIENT_VERSION_IS_RELEASE, true)
 define(_COPYRIGHT_YEAR, 2025)
 define(_PEERCOIN_VERSION_MAJOR, 0)
-define(_PEERCOIN_VERSION_MINOR, 15)
-define(_PEERCOIN_VERSION_REVISION, 1)
+define(_PEERCOIN_VERSION_MINOR, 1)
+define(_PEERCOIN_VERSION_REVISION, 0)
 define(_PEERCOIN_VERSION_BUILD, 0)
 define(_PEERCOIN_VERSION_RC, 0)
 define(_COPYRIGHT_HOLDERS,[The %s developers])
-define(_COPYRIGHT_HOLDERS_SUBSTITUTION,[[Peercoin]])
-AC_INIT([Peercoin],m4_join([.], _PEERCOIN_VERSION_MAJOR._PEERCOIN_VERSION_MINOR._PEERCOIN_VERSION_REVISION, m4_if(_PEERCOIN_VERSION_BUILD, [0], [], _PEERCOIN_VERSION_BUILD))m4_if(_PEERCOIN_VERSION_RC, [0], [], [rc]_PEERCOIN_VERSION_RC),[https://github.com/peercoin/peercoin/issues],[peercoin],[https://peercoin.net/])
+define(_COPYRIGHT_HOLDERS_SUBSTITUTION,[[EqualishCoin]])
+AC_INIT([EqualishCoin],m4_join([.], _PEERCOIN_VERSION_MAJOR._PEERCOIN_VERSION_MINOR._PEERCOIN_VERSION_REVISION, m4_if(_PEERCOIN_VERSION_BUILD, [0], [], _PEERCOIN_VERSION_BUILD))m4_if(_PEERCOIN_VERSION_RC, [0], [], [rc]_PEERCOIN_VERSION_RC),[https://github.com/equalishcoin/equalishcoin/issues],[equalishcoin],[https://equalishcoin.org/])
 AC_CONFIG_SRCDIR([src/validation.cpp])
 AC_CONFIG_HEADERS([src/config/bitcoin-config.h])
 AC_CONFIG_AUX_DIR([build-aux])
@@ -34,17 +34,17 @@ if test -n "$PKG_CONFIG_LIBDIR"; then
   PKG_CONFIG="env PKG_CONFIG_LIBDIR=$PKG_CONFIG_LIBDIR $PKG_CONFIG"
 fi
 
-BITCOIN_DAEMON_NAME=peercoind
-BITCOIN_GUI_NAME=peercoin-qt
-BITCOIN_TEST_NAME=test_peercoin
-BITCOIN_CLI_NAME=peercoin-cli
-BITCOIN_TX_NAME=peercoin-tx
-BITCOIN_UTIL_NAME=peercoin-util
-BITCOIN_CHAINSTATE_NAME=peercoin-chainstate
-BITCOIN_WALLET_TOOL_NAME=peercoin-wallet
+BITCOIN_DAEMON_NAME=equalishcoind
+BITCOIN_GUI_NAME=equalishcoin-qt
+BITCOIN_TEST_NAME=test_equalishcoin
+BITCOIN_CLI_NAME=equalishcoin-cli
+BITCOIN_TX_NAME=equalishcoin-tx
+BITCOIN_UTIL_NAME=equalishcoin-util
+BITCOIN_CHAINSTATE_NAME=equalishcoin-chainstate
+BITCOIN_WALLET_TOOL_NAME=equalishcoin-wallet
 dnl Multi Process
-BITCOIN_MP_NODE_NAME=peercoin-node
-BITCOIN_MP_GUI_NAME=peercoin-gui
+BITCOIN_MP_NODE_NAME=equalishcoin-node
+BITCOIN_MP_GUI_NAME=equalishcoin-gui
 
 dnl Unless the user specified ARFLAGS, force it to be cr
 dnl This is also the default as-of libtool 2.4.7

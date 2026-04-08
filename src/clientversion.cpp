@@ -16,9 +16,9 @@
  * for both bitcoind and bitcoin-qt, to make it harder for attackers to
  * target servers or GUI users specifically.
  */
-const std::string CLIENT_NAME("Satoshi");
+const std::string CLIENT_NAME("EqualishCoin");
 
-#define CLIENT_VERSION_SUFFIX " Anisoptera"
+#define CLIENT_VERSION_SUFFIX " FairGiveOrTake"
 
 #ifdef HAVE_BUILD_INFO
 #include <obj/build.h>
@@ -76,7 +76,7 @@ std::string FormatSubVersion(const std::string& name, int nClientVersion, const 
         ss << ")";
     }
     ss << "/";
-    ss << "Peercoin:" << FormatVersion(PEERCOIN_VERSION);
+    ss << "EqualishCoin:" << FormatVersion(PEERCOIN_VERSION);
     ss << "(" << FormatFullVersion() << ")/";
     return ss.str();
 }
@@ -101,7 +101,7 @@ std::string CopyrightHolders(const std::string& strPrefix)
 
 std::string LicenseInfo()
 {
-    const std::string URL_SOURCE_CODE = "<https://github.com/peercoin/peercoin>";
+    const std::string URL_SOURCE_CODE = "<https://github.com/equalishcoin/equalishcoin>";
 
     return CopyrightHolders(strprintf(_("Copyright (C) %i-%i").translated, 2011, COPYRIGHT_YEAR) + " ") + "\n" +
            "\n" +

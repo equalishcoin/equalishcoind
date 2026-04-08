@@ -21,7 +21,7 @@ static const CAmount PERKB_TX_FEE = CENT;
 static const CAmount MIN_TXOUT_AMOUNT = CENT;
 static const CAmount MAX_MINT_PROOF_OF_WORK = 9999 * COIN;
 static const CAmount MAX_MINT_PROOF_OF_WORK_V10 = 50 * COIN;
-static const std::string CURRENCY_UNIT = "PPC";
+static const std::string CURRENCY_UNIT = "EQLS";
 static const std::string CURRENCY_ATOM = "sat"; // One indivisible minimum value unit
 
 /** No amount larger than this (in satoshi) is valid.
