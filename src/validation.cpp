@@ -357,7 +357,7 @@ void Chainstate::MaybeUpdateMempoolForReorg(
                 const Coin& coin{CoinsTip().AccessCoin(txin.prevout)};
                 assert(!coin.IsSpent());
                 const auto mempool_spend_height{m_chain.Tip()->nHeight + 1};
-                if (coin.IsCoinBase() && mempool_spend_height - coin.nHeight < COINBASE_MATURITY) {
+                if (coin.IsCoinBase() && mempool_spend_height - coin.nHeight < Params().GetConsensus().nCoinbaseMaturity) {
                     return true;
                 }
             }
@@ -1977,6 +1977,7 @@ bool PeercoinContextualBlockChecks(const CBlock& block, BlockValidationState& st
     pindex->hashProofOfStake = hashProofOfStakeBackup;
     // compute nStakeModifierChecksum end
 
+    LogPrintf("ConnectBlock() : height=%d stake modifier checksum=0x%08x\n", pindex->nHeight, nStakeModifierChecksum);
     if (!CheckStakeModifierCheckpoints(pindex->nHeight, nStakeModifierChecksum))
         return error("ConnectBlock() : Rejected by stake modifier checkpoint height=%d, modifier=0x%016llx", pindex->nHeight, nStakeModifier);
 

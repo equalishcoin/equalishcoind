@@ -2,11 +2,14 @@
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+
 # Pattern rule to print variables, e.g. make print-top_srcdir
 print-%: FORCE
-	@echo '$*'='$($*)'
+  @echo '$*'='$($*)'
 
-DIST_SUBDIRS = secp256k1
+# Ensure all subdirs are built, including qt (GUI) and test
+SUBDIRS = secp256k1 qt test
+DIST_SUBDIRS = secp256k1 qt test
 
 AM_LDFLAGS = $(LIBTOOL_LDFLAGS) $(HARDENED_LDFLAGS) $(GPROF_LDFLAGS) $(SANITIZER_LDFLAGS) $(LTO_LDFLAGS) $(CORE_LDFLAGS)
 AM_CXXFLAGS = $(DEBUG_CXXFLAGS) $(HARDENED_CXXFLAGS) $(WARN_CXXFLAGS) $(NOWARN_CXXFLAGS) $(ERROR_CXXFLAGS) $(GPROF_CXXFLAGS) $(SANITIZER_CXXFLAGS) $(LTO_CXXFLAGS) $(CORE_CXXFLAGS)
@@ -483,6 +486,7 @@ libbitcoin_wallet_a_SOURCES = \
   wallet/rpc/transactions.cpp \
   wallet/rpc/util.cpp \
   wallet/rpc/wallet.cpp \
+  wallet/rpc/staking.cpp \
   wallet/scriptpubkeyman.cpp \
   wallet/spend.cpp \
   wallet/transaction.cpp \

@@ -182,6 +182,10 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
                     // as it would be the same as the block timestamp
                     coinbaseTx.vout[0].SetEmpty();
                     coinbaseTx.nTime = txCoinStake.nTime;
+                            // Set PoW coinbase nTime to block time (Peercoin-style)
+                            if (!pblock->IsProofOfStake()) {
+                                coinbaseTx.nTime = pblock->nTime;
+                            }
                     pblock->vtx.push_back(MakeTransactionRef(CTransaction(txCoinStake)));
                     *pfPoSCancel = false;
                 }

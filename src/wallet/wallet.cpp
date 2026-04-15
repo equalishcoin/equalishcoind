@@ -3330,9 +3330,26 @@ int CWallet::GetTxDepthInMainChain(const CWalletTx& wtx) const
     LOCK(cs_main);
     ChainstateManager& chainman = chain().chainman();
     if (auto* conf = wtx.state<TxStateConfirmed>()) {
-        return chainman.ActiveChain().HeightStake() - chainman.m_blockman.LookupBlockIndex(conf->confirmed_block_hash)->nHeightStake + 1;
+        const CBlockIndex* pindex = chainman.m_blockman.LookupBlockIndex(conf->confirmed_block_hash);
+        if (!pindex) return 0;
+        int tip_height = chainman.ActiveChain().Height();
+        // Use nHeightStake for PoS, nHeight for PoW
+        if (pindex->IsProofOfStake()) {
+            int tip_stake = chainman.ActiveChain().HeightStake();
+            return tip_stake - pindex->nHeightStake + 1;
+        } else {
+            return tip_height - pindex->nHeight + 1;
+        }
     } else if (auto* conf = wtx.state<TxStateConflicted>()) {
-        return -1 * (chainman.ActiveChain().HeightStake() - chainman.m_blockman.LookupBlockIndex(conf->conflicting_block_hash)->nHeightStake + 1);
+        const CBlockIndex* pindex = chainman.m_blockman.LookupBlockIndex(conf->conflicting_block_hash);
+        if (!pindex) return 0;
+        int tip_height = chainman.ActiveChain().Height();
+        if (pindex->IsProofOfStake()) {
+            int tip_stake = chainman.ActiveChain().HeightStake();
+            return -1 * (tip_stake - pindex->nHeightStake + 1);
+        } else {
+            return -1 * (tip_height - pindex->nHeight + 1);
+        }
     } else {
         return 0;
     }
