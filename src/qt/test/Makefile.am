@@ -1,1 +1,1 @@
-# Placeholder for qt/test Makefile.am
+EXTRA_DIST = .keep

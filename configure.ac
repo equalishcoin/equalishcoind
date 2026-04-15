@@ -2064,7 +2064,7 @@ AC_SUBST(HAVE_MM_PREFETCH)
 AC_SUBST(HAVE_STRONG_GETAUXVAL)
 AC_SUBST(ANDROID_ARCH)
 AC_SUBST(HAVE_EVHTTP_CONNECTION_GET_PEER_CONST_CHAR)
-AC_CONFIG_FILES([Makefile src/Makefile doc/man/Makefile share/setup.nsi share/qt/Info.plist test/config.ini])
+AC_CONFIG_FILES([Makefile src/Makefile doc/man/Makefile share/setup.nsi share/qt/Info.plist test/config.ini src/qt/Makefile src/qt/test/Makefile src/test/Makefile])
 AC_CONFIG_FILES([contrib/devtools/split-debug.sh],[chmod +x contrib/devtools/split-debug.sh])
 AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([doc/Doxyfile])])
 AC_CONFIG_LINKS([contrib/devtools/iwyu/bitcoin.core.imp:contrib/devtools/iwyu/bitcoin.core.imp])
@@ -2076,9 +2076,6 @@ AC_CONFIG_LINKS([test/functional/test_runner.py:test/functional/test_runner.py])
 AC_CONFIG_LINKS([test/fuzz/test_runner.py:test/fuzz/test_runner.py])
 AC_CONFIG_LINKS([test/util/test_runner.py:test/util/test_runner.py])
 AC_CONFIG_LINKS([test/util/rpcauth-test.py:test/util/rpcauth-test.py])
-AC_CONFIG_LINKS([src/qt/Makefile:src/qt/Makefile])
-AC_CONFIG_LINKS([src/qt/test/Makefile:src/qt/test/Makefile])
-AC_CONFIG_LINKS([src/test/Makefile:src/test/Makefile])
 
 dnl boost's m4 checks do something really nasty: they export these vars. As a
 dnl result, they leak into secp256k1's configure and crazy things happen.

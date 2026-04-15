@@ -1,1 +1,1 @@
-# Placeholder for test Makefile.am
+EXTRA_DIST = .keep
