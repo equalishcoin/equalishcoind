@@ -1,4 +1,4 @@
-usr/local/bin/peercoin-qt usr/bin
+usr/local/bin/equalishcoin-qt usr/bin
 share/pixmaps/peercoin16.png usr/share/pixmaps
 share/pixmaps/peercoin32.png usr/share/pixmaps
 share/pixmaps/peercoin128.png usr/share/pixmaps
