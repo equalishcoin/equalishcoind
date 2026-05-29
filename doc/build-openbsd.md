@@ -1,8 +1,8 @@
 # OpenBSD Build Guide
 
-This guide describes how to build peercoind, peercoin-qt, and command-line utilities on OpenBSD.
+This guide describes how to build equalishcoind, equalishcoin-qt, and command-line utilities on OpenBSD.
 
-This guide describes how to build bitcoind, command-line utilities, and GUI on OpenBSD.
+This guide describes how to build equalishcoind, command-line utilities, and GUI on OpenBSD.
 
 ## Preparation
 
@@ -17,7 +17,7 @@ pkg_add automake # (select highest version, e.g. 1.16)
 pkg_add python # (select highest version, e.g. 3.8)
 pkg_add bash
 
-git clone https://github.com/peercoin/peercoin.git
+git clone https://github.com/equalishcoin/equalishcoin.git
 ```
 
 See [dependencies.md](dependencies.md) for a complete overview.
@@ -32,7 +32,7 @@ git clone https://github.com/bitcoin/bitcoin.git
 
 #### Wallet Dependencies
 
-It is not necessary to build wallet functionality to run either `bitcoind` or `bitcoin-qt`.
+It is not necessary to build wallet functionality to run either `equalishcoind` or `equalishcoin-qt`.
 
 ###### Descriptor Wallet Support
 
@@ -60,7 +60,7 @@ Then set `BDB_PREFIX`:
 export BDB_PREFIX="/path/to/bitcoin/depends/x86_64-unknown-openbsd"
 ```
 
-### Building Peercoin
+### Building EqualishCoin
 
 **Important**: Use `gmake` (the non-GNU `make` will exit with an error).
 
