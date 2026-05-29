@@ -155,7 +155,8 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
 
     if (pwallet == nullptr) {
         pblock->nBits = GetNextTargetRequired(pindexPrev, false, chainparams.GetConsensus());
-        coinbaseTx.vout[0].nValue = GetProofOfWorkReward(pblock->nBits, pblock->nTime);
+        const CAmount reward_limit = GetProofOfWorkReward(pblock->nBits, pblock->nTime);
+        coinbaseTx.vout[0].nValue = IsIssuanceSplitEnabled(chainparams.GetConsensus()) ? SplitIssuanceBudget(chainparams.GetConsensus(), reward_limit).pow_budget : reward_limit;
     }
 
     // Add dummy coinbase tx as first transaction
