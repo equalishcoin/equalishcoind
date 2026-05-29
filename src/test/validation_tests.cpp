@@ -157,6 +157,44 @@ BOOST_AUTO_TEST_CASE(issuance_budget_primitives)
     BOOST_CHECK_EQUAL(split.rounding_remainder, 1);
 }
 
+BOOST_AUTO_TEST_CASE(pow_issuance_budget_enforced_in_block_validation)
+{
+    const auto params = CreateChainParams(*m_node.args, CBaseChainParams::REGTEST);
+    const auto &consensus = params->GetConsensus();
+
+    CBlock block;
+    block.nVersion = 3;
+    block.hashPrevBlock = params->GenesisBlock().GetHash();
+    block.nTime = params->GenesisBlock().nTime + 1;
+    block.nBits = params->GenesisBlock().nBits;
+    block.nNonce = 0;
+
+    CMutableTransaction coinbase_tx;
+    coinbase_tx.vin.resize(1);
+    coinbase_tx.vin[0].prevout.SetNull();
+    coinbase_tx.vin[0].scriptSig = CScript() << 1 << OP_0;
+    coinbase_tx.vout.resize(1);
+    coinbase_tx.vout[0].scriptPubKey = CScript() << OP_TRUE;
+
+    const CAmount total_reward = GetProofOfWorkReward(block.nBits, block.nTime);
+    const CAmount pow_budget = SplitIssuanceBudget(consensus, total_reward).pow_budget;
+
+    coinbase_tx.vout[0].nValue = pow_budget;
+    block.vtx = {MakeTransactionRef(coinbase_tx)};
+    block.hashMerkleRoot = BlockMerkleRoot(block);
+
+    BlockValidationState valid_state;
+    BOOST_CHECK(CheckBlock(block, valid_state, consensus, /*fCheckPOW=*/false, /*fCheckMerkleRoot=*/true, /*fCheckSignature=*/false));
+
+    coinbase_tx.vout[0].nValue = pow_budget + 1;
+    block.vtx = {MakeTransactionRef(coinbase_tx)};
+    block.hashMerkleRoot = BlockMerkleRoot(block);
+
+    BlockValidationState invalid_state;
+    BOOST_CHECK(!CheckBlock(block, invalid_state, consensus, /*fCheckPOW=*/false, /*fCheckMerkleRoot=*/true, /*fCheckSignature=*/false));
+    BOOST_CHECK_EQUAL(invalid_state.GetRejectReason(), "bad-cb-amount");
+}
+
 BOOST_AUTO_TEST_CASE(block_malleation)
 {
     // Test utilities that calls `IsBlockMutated` and then clears the validity

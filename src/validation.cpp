@@ -3476,11 +3476,21 @@ bool CheckBlock(const CBlock& block, BlockValidationState& state, const Consensu
     CAmount nCoinbaseCost = 0;
     if (block.IsProofOfWork())
         nCoinbaseCost = (GetMinFee(*block.vtx[0], block.nTime) < PERKB_TX_FEE)? 0 : (GetMinFee(*block.vtx[0], block.nTime) - PERKB_TX_FEE);
-    if (block.vtx[0]->GetValueOut() > (block.IsProofOfWork()? (GetProofOfWorkReward(block.nBits, block.GetBlockTime()) - nCoinbaseCost) : 0))
-        return state.Invalid(BlockValidationResult::BLOCK_CONSENSUS, "bad-cb-amount",
+    const bool enforce_issuance_split = block.IsProofOfWork() && IsIssuanceSplitEnabled(consensusParams);
+    const CAmount reward_limit = block.IsProofOfWork() ? GetProofOfWorkReward(block.nBits, block.GetBlockTime()) : 0;
+    const CAmount spendable_reward = enforce_issuance_split ? SplitIssuanceBudget(consensusParams, reward_limit).pow_budget : reward_limit;
+    if (block.IsProofOfWork()) {
+        if (nCoinbaseCost > spendable_reward)
+            return state.Invalid(BlockValidationResult::BLOCK_CONSENSUS, "bad-cb-amount",
+                strprintf("CheckBlock() : coinbase reward exceeded %s > %s",
+                    FormatMoney(block.vtx[0]->GetValueOut()),
+                    FormatMoney(spendable_reward > nCoinbaseCost ? spendable_reward - nCoinbaseCost : 0)));
+        if (block.vtx[0]->GetValueOut() > (spendable_reward - nCoinbaseCost))
+            return state.Invalid(BlockValidationResult::BLOCK_CONSENSUS, "bad-cb-amount",
                 strprintf("CheckBlock() : coinbase reward exceeded %s > %s",
                    FormatMoney(block.vtx[0]->GetValueOut()),
-                   FormatMoney(block.IsProofOfWork()? GetProofOfWorkReward(block.nBits, block.GetBlockTime()) : 0)));
+                   FormatMoney(spendable_reward - nCoinbaseCost)));
+    }
     // Check transactions
     // Must check for duplicate inputs (see CVE-2018-17144)
     for (const auto& tx : block.vtx) {
