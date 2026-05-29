@@ -716,7 +716,7 @@ class TestNodeCLI():
         self.binary = binary
         self.datadir = datadir
         self.input = None
-        self.log = logging.getLogger('TestFramework.peercoincli')
+        self.log = logging.getLogger('TestFramework.equalishcoincli')
 
     def __call__(self, *options, input=None):
         # TestNodeCLI is callable with equalishcoin-cli command-line options
