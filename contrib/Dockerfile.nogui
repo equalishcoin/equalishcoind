@@ -41,7 +41,7 @@ RUN if [ -f Makefile ]; then make distclean || true; fi \
  && ./autogen.sh \
  && mkdir -p build \
  && cd build \
- && ../configure --without-gui --disable-tests --disable-bench --enable-wallet --with-incompatible-bdb --without-miniupnpc \
+ && ../configure --without-gui --disable-tests --disable-bench --enable-wallet --with-incompatible-bdb --without-miniupnpc --disable-dependency-tracking \
  && make -j"${MAKE_JOBS}" \
  && strip --strip-unneeded \
      ./src/equalishcoind \
