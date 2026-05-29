@@ -401,10 +401,10 @@ public:
 
         nDefaultPort = 39333;
 
-        genesis = CreateGenesisBlock(1345083810, 1345090000, 122894938, 0x1d0fffff, 1, 0);
+        genesis = CreateGenesisBlock("EqualishCoin: perfectly balanced comma probably.", CScript(), 1345083810, 1345090000, 122894938, 0x1d0fffff, 1, 0);
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0x00000001f757bb737f6596503e17cd17b0658ce630cc727c0cca81aec47c9f06"));
-        assert(genesis.hashMerkleRoot == uint256S("0x3c2d8f85fab4d17aac558cc648a1a58acff0de6deb890c29985690052c5993c2"));
+        assert(consensus.hashGenesisBlock == uint256S("0x7a1056e04931dd1ea5d8ca7a7f05a9ab80a1b5b51d310b3b5be83ff9393db042"));
+        assert(genesis.hashMerkleRoot == uint256S("0x17aea59429e0540b4dffa27cfda6bc99784bec6381b2ba6bdf3fec1faac593e5"));
 
         vFixedSeeds.clear();
 
@@ -511,11 +511,11 @@ public:
             consensus.vDeployments[deployment_pos].min_activation_height = version_bits_params.min_activation_height;
         }
 
-        genesis = CreateGenesisBlock(1345083810, 1345090000, 122894938, 0x1d0fffff, 1, 0);
+        genesis = CreateGenesisBlock("EqualishCoin: perfectly balanced comma probably.", CScript(), 1345083810, 1345090000, 122894938, 0x1d0fffff, 1, 0);
 
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0x00000001f757bb737f6596503e17cd17b0658ce630cc727c0cca81aec47c9f06"));
-        assert(genesis.hashMerkleRoot == uint256S("0x3c2d8f85fab4d17aac558cc648a1a58acff0de6deb890c29985690052c5993c2"));
+        assert(consensus.hashGenesisBlock == uint256S("0x7a1056e04931dd1ea5d8ca7a7f05a9ab80a1b5b51d310b3b5be83ff9393db042"));
+        assert(genesis.hashMerkleRoot == uint256S("0x17aea59429e0540b4dffa27cfda6bc99784bec6381b2ba6bdf3fec1faac593e5"));
 
         vFixedSeeds.clear(); //!< Regtest mode doesn't have any fixed seeds.
         vSeeds.clear();
