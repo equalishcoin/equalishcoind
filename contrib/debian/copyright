@@ -1,12 +1,12 @@
-Upstream-Name: Peercoin
-Upstream-Contact: Stichting Peercoin Foundation <foundation@peercoin.net>
-Source: https://github.com/peercoin/peercoin
+Upstream-Name: EqualishCoin
+Upstream-Contact: EqualishCoin maintainers <maintainers@equalishcoin.org>
+Source: https://github.com/equalishcoin/equalishcoin
 
 Files: *
-Copyright: 2011-2025 Peercoin Developers
+Copyright: 2011-2025 EqualishCoin Developers
 Copyright: 2009-2025, Bitcoin Core Developers
 License: Expat
-Comment: The Peercoin Developers encompasses the current developers listed on https://github.com/peercoin/peercoin,
+Comment: The EqualishCoin Developers encompasses the current developers listed on https://github.com/equalishcoin/equalishcoin,
          as well as the numerous contributors to the project.
 
 Files: debian/*
