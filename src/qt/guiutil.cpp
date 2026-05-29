@@ -141,9 +141,13 @@ void AddButtonShortcut(QAbstractButton* button, const QKeySequence& shortcut)
 
 bool parseBitcoinURI(const QUrl &uri, SendCoinsRecipient *out)
 {
-    // return if URI is not valid or is no bitcoin: URI
-    if(!uri.isValid() || (uri.scheme() != QString("peercoin") && uri.scheme() != QString("ppcoin")))
+    // return if URI is not valid or is no supported payment URI
+    if (!uri.isValid() ||
+        (uri.scheme() != QString("equalishcoin") &&
+         uri.scheme() != QString("peercoin") &&
+         uri.scheme() != QString("ppcoin"))) {
         return false;
+    }
 
     SendCoinsRecipient rv;
     rv.address = uri.path();
@@ -205,7 +209,7 @@ QString formatBitcoinURI(const SendCoinsRecipient &info)
 {
     bool bech_32 = info.address.startsWith(QString::fromStdString(Params().Bech32HRP() + "1"));
 
-    QString ret = QString("peercoin:%1").arg(bech_32 ? info.address.toUpper() : info.address);
+    QString ret = QString("equalishcoin:%1").arg(bech_32 ? info.address.toUpper() : info.address);
     int paramCount = 0;
 
     if (info.amount)
