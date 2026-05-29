@@ -1064,7 +1064,7 @@ bool AppInitSanityChecks(const kernel::Context& kernel)
         return InitError(strprintf(_("Initialization sanity check failed. %s is shutting down."), PACKAGE_NAME));
     }
 
-    // peercoin: init hash seed
+    // equalishcoin: init hash seed
     peercoinRandseed = GetRand(1 << 30);
 
     // Probe the data directory lock to give an early error message, if possible

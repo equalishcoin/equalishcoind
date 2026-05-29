@@ -125,7 +125,7 @@ static RPCHelpMan getnetworkhashps()
     };
 }
 
-// peercoin: get network Gh/s estimate
+// equalishcoin: get network Gh/s estimate
 static RPCHelpMan getnetworkghps()
 {
     return RPCHelpMan{"getnetworkghps",
@@ -948,7 +948,7 @@ static RPCHelpMan submitblock()
         }
     }
 
-    // peercoin: check block before attempting to sign it
+    // equalishcoin: check block before attempting to sign it
     BlockValidationState state;
     if (!CheckBlock(block, state, Params().GetConsensus(), true,  true, false)) {
         LogPrintf("SubmitBlock: %s\n", state.ToString());

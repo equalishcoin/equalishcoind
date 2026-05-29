@@ -447,7 +447,7 @@ std::shared_ptr<CWallet> CreateWallet(WalletContext& context, const std::string&
     return wallet;
 }
 
-// peercoin: optional setting to unlock wallet for block minting only;
+// equalishcoin: optional setting to unlock wallet for block minting only;
 //         serves to disable the trivial sendmoney when OS account compromised
 bool fWalletUnlockMintOnly = false;
 
@@ -3550,7 +3550,7 @@ void CWallet::ConnectScriptPubKeyManNotifiers()
     }
 }
 
-// peercoin: function to determine optimal fraction of supply for rfc28
+// equalishcoin: function to determine optimal fraction of supply for rfc28
 double SecurityToOptimalFraction(double security, bool isTestnet) {
     const double coeffsMain[] = {
         -0.01205449390140,      // const
@@ -3582,7 +3582,7 @@ double SecurityToOptimalFraction(double security, bool isTestnet) {
     return optimalFraction;
 }
 
-// peercoin: create coin stake transaction
+// equalishcoin: create coin stake transaction
 typedef std::vector<unsigned char> valtype;
 bool CWallet::CreateCoinStake(ChainstateManager& chainman, const CWallet* pwallet, unsigned int nBits, int64_t nSearchInterval, CMutableTransaction& txNew, CTxDestination destination)
 {

@@ -125,7 +125,7 @@ void BlockAssembler::resetBlock()
     nFees = 0;
 }
 
-// peercoin: if pwallet != NULL it will attempt to create coinstake
+// equalishcoin: if pwallet != NULL it will attempt to create coinstake
 std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& scriptPubKeyIn, CWallet* pwallet, bool* pfPoSCancel, NodeContext* m_node, CTxDestination destination)
 {
     const auto time_start{SteadyClock::now()};
@@ -164,7 +164,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     pblocktemplate->vTxFees.push_back(-1); // updated at end
     pblocktemplate->vTxSigOpsCost.push_back(-1); // updated at end
 
-    // peercoin: if coinstake available add coinstake tx
+    // equalishcoin: if coinstake available add coinstake tx
     static int64_t nLastCoinStakeSearchTime = pblock->nTime;  // only initialized at startup
 
 #ifdef ENABLE_WALLET
@@ -195,7 +195,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
             nLastCoinStakeSearchTime = nSearchTime;
         }
         if (*pfPoSCancel)
-            return nullptr; // peercoin: there is no point to continue if we failed to create coinstake
+            return nullptr; // equalishcoin: there is no point to continue if we failed to create coinstake
         pblock->nFlags = CBlockIndex::BLOCK_PROOF_OF_STAKE;
     }
 #endif
@@ -287,7 +287,7 @@ bool BlockAssembler::TestPackageTransactions(const CTxMemPool::setEntries& packa
         if (!IsFinalTx(it->GetTx(), nHeight, m_lock_time_cutoff)) {
             return false;
         }
-        // peercoin: timestamp limit
+        // equalishcoin: timestamp limit
         if (it->GetTx().nTime > TicksSinceEpoch<std::chrono::seconds>(GetAdjustedTime()) || (nTime && it->GetTx().nTime > nTime))
             return false;
     }
@@ -675,7 +675,7 @@ void PoSMiner(NodeContext& m_node)
             pblock = &pblocktemplate->block;
             IncrementExtraNonce(pblock, pindexPrev, nExtraNonce);
 
-            // peercoin: if proof-of-stake block found then process block
+            // equalishcoin: if proof-of-stake block found then process block
             if (pblock->IsProofOfStake())
             {
                 {
@@ -718,7 +718,7 @@ void PoSMiner(NodeContext& m_node)
 #endif
 }
 
-// peercoin: stake minter thread
+// equalishcoin: stake minter thread
 void static ThreadStakeMinter(NodeContext& m_node)
 {
     LogPrintf("ThreadStakeMinter started\n");
@@ -737,7 +737,7 @@ void static ThreadStakeMinter(NodeContext& m_node)
     LogPrintf("ThreadStakeMinter exiting\n");
 }
 
-// peercoin: stake minter
+// equalishcoin: stake minter
 void MintStake(NodeContext& m_node)
 {
     m_minter_thread = std::thread([&] { util::TraceThread("minter", [&] { ThreadStakeMinter(m_node); }); });

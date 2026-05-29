@@ -360,10 +360,10 @@ public:
     //! at which height this transaction was included in the active block chain
     int nHeight;
 
-    // peercoin: whether transaction is a coinstake
+    // equalishcoin: whether transaction is a coinstake
     bool fCoinStake;
 
-    // peercoin: transaction timestamp
+    // equalishcoin: transaction timestamp
     unsigned int nTime;
 
     //! empty constructor
