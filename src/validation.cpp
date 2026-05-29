@@ -1448,6 +1448,58 @@ int64_t GetProofOfStakeReward(int64_t nCoinAge, uint32_t nTime, uint64_t nMoneyS
     return nSubsidy;
 }
 
+bool IsIssuanceSplitEnabled(const Consensus::Params& params)
+{
+    return params.nIssuanceEpochLength > 0;
+}
+
+static int NormalizeSplitBasisPoints(const Consensus::Params& params)
+{
+    return std::clamp(params.nIssuancePoWSplitBasisPoints, 0, 10000);
+}
+
+std::optional<int64_t> GetIssuanceEpochIndex(const Consensus::Params& params, int height)
+{
+    if (!IsIssuanceSplitEnabled(params) || height < 0) {
+        return std::nullopt;
+    }
+    return height / params.nIssuanceEpochLength;
+}
+
+std::optional<int> GetIssuanceEpochStartHeight(const Consensus::Params& params, int height)
+{
+    const std::optional<int64_t> epoch{GetIssuanceEpochIndex(params, height)};
+    if (!epoch) {
+        return std::nullopt;
+    }
+    return static_cast<int>(*epoch) * params.nIssuanceEpochLength;
+}
+
+IssuanceBudgetSplit SplitIssuanceBudget(const Consensus::Params& params, CAmount total_budget)
+{
+    constexpr int BASIS_POINTS_DENOMINATOR = 10000;
+
+    const int pow_bps{NormalizeSplitBasisPoints(params)};
+    const int pos_bps{BASIS_POINTS_DENOMINATOR - pow_bps};
+
+    const __int128 scaled_pow = static_cast<__int128>(total_budget) * pow_bps;
+    const __int128 scaled_pos = static_cast<__int128>(total_budget) * pos_bps;
+
+    const CAmount pow_floor = static_cast<CAmount>(scaled_pow / BASIS_POINTS_DENOMINATOR);
+    const CAmount pos_floor = static_cast<CAmount>(scaled_pos / BASIS_POINTS_DENOMINATOR);
+
+    IssuanceBudgetSplit split;
+    split.pow_budget = pow_floor;
+    split.pos_budget = pos_floor;
+    split.rounding_remainder = total_budget - (pow_floor + pos_floor);
+
+    if (params.fIssuanceCarryRemainder) {
+        split.pos_budget += split.rounding_remainder;
+    }
+
+    return split;
+}
+
 CoinsViews::CoinsViews(DBParams db_params, CoinsViewOptions options)
     : m_dbview{std::move(db_params), std::move(options)},
       m_catcherview(&m_dbview) {}

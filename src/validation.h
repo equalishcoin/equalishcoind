@@ -1227,6 +1227,15 @@ using FopenFn = std::function<FILE*(const fs::path&, const char*)>;
 // peercoin:
 CAmount GetProofOfWorkReward(unsigned int nBits, uint32_t nTime);
 CAmount GetProofOfStakeReward(int64_t nCoinAge, uint32_t nTime, uint64_t nMoneySupply);
+struct IssuanceBudgetSplit {
+    CAmount pow_budget{0};
+    CAmount pos_budget{0};
+    CAmount rounding_remainder{0};
+};
+bool IsIssuanceSplitEnabled(const Consensus::Params& params);
+std::optional<int64_t> GetIssuanceEpochIndex(const Consensus::Params& params, int height);
+std::optional<int> GetIssuanceEpochStartHeight(const Consensus::Params& params, int height);
+IssuanceBudgetSplit SplitIssuanceBudget(const Consensus::Params& params, CAmount total_budget);
 bool GetCoinAge(const CTransaction& tx, const CCoinsViewCache &view, uint64_t& nCoinAge, unsigned int nTimeTx, bool isTrueCoinAge = true); // peercoin: get transaction coin age
 #ifdef ENABLE_WALLET
 bool SignBlock(CBlock& block, const CWallet& keystore);

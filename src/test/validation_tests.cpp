@@ -104,6 +104,59 @@ BOOST_AUTO_TEST_CASE(test_assumeutxo)
     BOOST_CHECK_EQUAL(out210.nChainTx, 200U);
 }
 
+BOOST_AUTO_TEST_CASE(issuance_budget_primitives)
+{
+    Consensus::Params params = Params().GetConsensus();
+
+    // Disabled until an epoch length is configured.
+    params.nIssuanceEpochLength = 0;
+    BOOST_CHECK(!IsIssuanceSplitEnabled(params));
+    BOOST_CHECK(!GetIssuanceEpochIndex(params, 0));
+    BOOST_CHECK(!GetIssuanceEpochStartHeight(params, 0));
+
+    // Epoch arithmetic is deterministic and height-derived.
+    params.nIssuanceEpochLength = 1000;
+    params.nIssuancePoWSplitBasisPoints = 5000;
+    params.fIssuanceCarryRemainder = true;
+
+    BOOST_CHECK(IsIssuanceSplitEnabled(params));
+    BOOST_CHECK_EQUAL(*GetIssuanceEpochIndex(params, 0), 0);
+    BOOST_CHECK_EQUAL(*GetIssuanceEpochStartHeight(params, 0), 0);
+    BOOST_CHECK_EQUAL(*GetIssuanceEpochIndex(params, 999), 0);
+    BOOST_CHECK_EQUAL(*GetIssuanceEpochStartHeight(params, 999), 0);
+    BOOST_CHECK_EQUAL(*GetIssuanceEpochIndex(params, 1000), 1);
+    BOOST_CHECK_EQUAL(*GetIssuanceEpochStartHeight(params, 1000), 1000);
+    BOOST_CHECK(!GetIssuanceEpochIndex(params, -1));
+    BOOST_CHECK(!GetIssuanceEpochStartHeight(params, -1));
+
+    // Even split, no rounding remainder.
+    IssuanceBudgetSplit split = SplitIssuanceBudget(params, /*total_budget=*/100);
+    BOOST_CHECK_EQUAL(split.pow_budget, 50);
+    BOOST_CHECK_EQUAL(split.pos_budget, 50);
+    BOOST_CHECK_EQUAL(split.rounding_remainder, 0);
+
+    // Odd total with carry remainder enabled: remainder is assigned to PoS side.
+    split = SplitIssuanceBudget(params, /*total_budget=*/3);
+    BOOST_CHECK_EQUAL(split.pow_budget, 1);
+    BOOST_CHECK_EQUAL(split.pos_budget, 2);
+    BOOST_CHECK_EQUAL(split.rounding_remainder, 1);
+
+    // Odd total with carry remainder disabled: both sides use floor split.
+    params.fIssuanceCarryRemainder = false;
+    split = SplitIssuanceBudget(params, /*total_budget=*/3);
+    BOOST_CHECK_EQUAL(split.pow_budget, 1);
+    BOOST_CHECK_EQUAL(split.pos_budget, 1);
+    BOOST_CHECK_EQUAL(split.rounding_remainder, 1);
+
+    // Non-50/50 ratio remains deterministic.
+    params.nIssuancePoWSplitBasisPoints = 3333;
+    params.fIssuanceCarryRemainder = true;
+    split = SplitIssuanceBudget(params, /*total_budget=*/10);
+    BOOST_CHECK_EQUAL(split.pow_budget, 3);
+    BOOST_CHECK_EQUAL(split.pos_budget, 7);
+    BOOST_CHECK_EQUAL(split.rounding_remainder, 1);
+}
+
 BOOST_AUTO_TEST_CASE(block_malleation)
 {
     // Test utilities that calls `IsBlockMutated` and then clears the validity

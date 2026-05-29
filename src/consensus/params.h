@@ -152,6 +152,11 @@ struct Params {
     int64_t nStakeMaxAge;
     int64_t nModifierInterval;
     int nCoinbaseMaturity;  // Coinbase transaction outputs can only be spent after this number of new blocks (network rule)
+
+    // EqualishCoin issuance split primitives (phase 3)
+    int nIssuanceEpochLength{0};
+    int nIssuancePoWSplitBasisPoints{5000};
+    bool fIssuanceCarryRemainder{true};
 };
 
 } // namespace Consensus

@@ -125,6 +125,9 @@ public:
         consensus.nStakeMaxAge = 60 * 60 * 24 * 90;
         consensus.nModifierInterval = 6 * 60 * 60; // Modifier interval: time to elapse before new modifier is computed
         consensus.nCoinbaseMaturity = 30; // bootstrap mode: faster reward maturity
+        consensus.nIssuanceEpochLength = 2016;
+        consensus.nIssuancePoWSplitBasisPoints = 5000;
+        consensus.fIssuanceCarryRemainder = true;
 
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
@@ -232,6 +235,9 @@ public:
         consensus.nStakeMaxAge = 60 * 60 * 24 * 90;
         consensus.nModifierInterval = 60 * 20; // Modifier interval: time to elapse before new modifier is computed
         consensus.nCoinbaseMaturity = 60;
+        consensus.nIssuanceEpochLength = 2016;
+        consensus.nIssuancePoWSplitBasisPoints = 5000;
+        consensus.fIssuanceCarryRemainder = true;
 
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
@@ -366,6 +372,9 @@ public:
         consensus.SegwitHeight = 1;
         //consensus.nTargetTimespan = 7 * 24 * 60 * 60; // two weeks
         consensus.nPowTargetSpacing = 10 * 60;
+        consensus.nIssuanceEpochLength = 2016;
+        consensus.nIssuancePoWSplitBasisPoints = 5000;
+        consensus.fIssuanceCarryRemainder = true;
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 1815; // 90% of 2016
@@ -446,6 +455,9 @@ public:
         consensus.nStakeMaxAge = 60 * 60 * 24 * 90;
         consensus.nModifierInterval = 60 * 20; // Modifier interval: time to elapse before new modifier is computed
         consensus.nCoinbaseMaturity = 60;
+        consensus.nIssuanceEpochLength = 144;
+        consensus.nIssuancePoWSplitBasisPoints = 5000;
+        consensus.fIssuanceCarryRemainder = true;
 
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = true;
