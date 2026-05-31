@@ -404,7 +404,7 @@ void BitcoinGUI::createActions()
     openChatroomAction->setStatusTip(tr("Open the EqualishCoin Discord chat in a web browser."));
 
     openForumAction = new QAction(tr("&Forum"), this);
-    openForumAction->setStatusTip(tr("Open talk.equalishcoin.net in a web browser."));
+    openForumAction->setStatusTip(tr("Open equalishcoin.com in a web browser."));
 
     m_mask_values_action = new QAction(tr("&Mask values"), this);
     m_mask_values_action->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_M));
@@ -1043,11 +1043,11 @@ void BitcoinGUI::gotoLoadPSBT(bool from_clipboard)
 #endif // ENABLE_WALLET
 
 void BitcoinGUI::openWeb() {
-    QDesktopServices::openUrl(QUrl("https://equalishcoin.net"));
+    QDesktopServices::openUrl(QUrl("https://equalishcoin.com"));
 }
 
 void BitcoinGUI::openDonate() {
-    QDesktopServices::openUrl(QUrl("https://www.equalishcoin.net/foundation"));
+    QDesktopServices::openUrl(QUrl("https://www.equalishcoin.com/foundation"));
 }
 
 void BitcoinGUI::openChatroom() {
@@ -1055,7 +1055,7 @@ void BitcoinGUI::openChatroom() {
 }
 
 void BitcoinGUI::openForum() {
-    QDesktopServices::openUrl(QUrl("https://talk.equalishcoin.net"));
+    QDesktopServices::openUrl(QUrl("https://equalishcoin.com"));
 }
 
 void BitcoinGUI::updateNetworkState()
