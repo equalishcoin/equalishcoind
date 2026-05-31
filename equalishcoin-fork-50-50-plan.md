@@ -1,8 +1,8 @@
 # EqualishCoin Fork + 50/50 Issuance Execution Plan
 
-Status: Draft
+Status: In Progress
 Owner: TBD
-Last updated: 2026-05-28
+Last updated: 2026-05-30
 
 ## Objective
 
@@ -71,12 +71,12 @@ Tasks
 - [ ] Update message start bytes for all networks.
 - [ ] Update P2P/RPC/default ports for all networks.
 - [ ] Update base58 address prefixes and bech32 HRP.
-- [ ] Replace seed nodes and fixed seeds placeholders.
-- [ ] Update binary/help strings where needed.
+- [x] Replace seed nodes and fixed seeds placeholders.
+- [x] Update binary/help strings where needed.
 
 Deliverables
 
-- [ ] Rebranded binaries start without touching reward logic.
+- [x] Rebranded binaries start without touching reward logic.
 
 Validation Gate
 
@@ -367,6 +367,9 @@ Mitigations
 ## Progress Log
 
 - 2026-05-28: Plan document created.
+- 2026-05-30: Broad non-consensus rebrand pass completed across docs/UI/help/manpages and runtime-facing links.
+- 2026-05-30: Runtime check confirmed rebranded daemon/container startup and healthy RPC path (`equalishcoin-cli` with explicit datadir/user).
+- 2026-05-30: Docker architecture cleanup in progress; compose no longer forces amd64, but fresh no-cache image build still failing in builder stage object-path generation.
 
 ## Notes / Open Questions
 

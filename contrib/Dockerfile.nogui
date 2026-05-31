@@ -42,6 +42,9 @@ RUN if [ -f Makefile ]; then make distclean || true; fi \
  && mkdir -p build \
  && cd build \
  && ../configure --without-gui --disable-tests --disable-bench --enable-wallet --with-incompatible-bdb --without-miniupnpc --disable-dependency-tracking \
+ && mkdir -p src \
+ && (cd src && find ../../src -type f \( -name '*.c' -o -name '*.cpp' -o -name '*.S' \) -printf '%h\n' | sed 's#^../../src/##' | sort -u | xargs -r mkdir -p) \
+ && mkdir -p src/leveldb/table src/leveldb/db src/leveldb/helpers src/leveldb/helpers/memenv src/leveldb/util \
  && make -j"${MAKE_JOBS}" \
  && strip --strip-unneeded \
      ./src/equalishcoind \
@@ -56,7 +59,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
-    gosu \
     bash \
     curl \
     libevent-dev \
@@ -81,5 +83,6 @@ COPY --from=builder --chmod=755 /src/build/src/equalishcoin-wallet /usr/local/bi
 
 COPY --chmod=755 contrib/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
+USER equalishcoin
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["equalishcoind"]

@@ -137,6 +137,9 @@ Migrated wallets will also generate new addresses differently. While the same BI
 used, the BIP 44, 49, 84, and 86 standard derivation paths will be used. After migrating, a new
 backup of the wallet(s) will need to be created.
 
+For EqualishCoin mainnet, descriptor wallets use SLIP-0044 coin type `1701` in these paths
+(for example: `m/44'/1701'/0'/0/0`). Test chains continue to use coin type `1`.
+
 Given that there is an extremely large number of possible configurations for the scripts that
 Legacy wallets can know about, be watching for, and be able to sign for, `migratewallet` only
 makes a best effort attempt to capture all of these things into Descriptor wallets. There may be

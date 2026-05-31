@@ -1479,14 +1479,18 @@ IssuanceBudgetSplit SplitIssuanceBudget(const Consensus::Params& params, CAmount
 {
     constexpr int BASIS_POINTS_DENOMINATOR = 10000;
 
+    const auto scale_by_basis_points = [](CAmount amount, int bps) -> CAmount {
+        // Compute amount*bps/denominator without widening to non-portable 128-bit types.
+        const CAmount whole = amount / BASIS_POINTS_DENOMINATOR;
+        const CAmount remainder = amount % BASIS_POINTS_DENOMINATOR;
+        return whole * bps + (remainder * bps) / BASIS_POINTS_DENOMINATOR;
+    };
+
     const int pow_bps{NormalizeSplitBasisPoints(params)};
     const int pos_bps{BASIS_POINTS_DENOMINATOR - pow_bps};
 
-    const __int128 scaled_pow = static_cast<__int128>(total_budget) * pow_bps;
-    const __int128 scaled_pos = static_cast<__int128>(total_budget) * pos_bps;
-
-    const CAmount pow_floor = static_cast<CAmount>(scaled_pow / BASIS_POINTS_DENOMINATOR);
-    const CAmount pos_floor = static_cast<CAmount>(scaled_pos / BASIS_POINTS_DENOMINATOR);
+    const CAmount pow_floor = scale_by_basis_points(total_budget, pow_bps);
+    const CAmount pos_floor = scale_by_basis_points(total_budget, pos_bps);
 
     IssuanceBudgetSplit split;
     split.pow_budget = pow_floor;

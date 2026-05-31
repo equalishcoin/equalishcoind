@@ -1,12 +1,12 @@
 services:
   equalishcoind:
-    platform: linux/amd64
     build:
       context: ..
       dockerfile: contrib/Dockerfile.nogui
       args:
         MAKE_JOBS: "4"
     container_name: equalishcoind
+    user: "1000:1000"
     restart: unless-stopped
     environment:
       EQUALISHCOIN_DATA_DIR: /home/equalishcoin/.equalishcoin
@@ -34,9 +34,43 @@ services:
       test:
         [
           "CMD-SHELL",
-          "curl -fsS --user \"$${COIND_RPC_USER}:$${COIND_RPC_PASSWORD}\" --data-binary '{\"jsonrpc\":\"1.0\",\"id\":\"health\",\"method\":\"getblockchaininfo\",\"params\":[]}' -H 'content-type: text/plain;' http://127.0.0.1:$${COIND_RPC_PORT}/ >/dev/null"
+          "equalishcoin-cli -datadir=\"$${EQUALISHCOIN_DATA_DIR}\" -conf=\"$${EQUALISHCOIN_CONF}\" getblockchaininfo >/dev/null"
         ]
       interval: 30s
       timeout: 10s
       retries: 20
       start_period: 120s
+
+  equalishcoin-bootstrap-miner:
+    profiles:
+      - bootstrap
+    build:
+      context: ..
+      dockerfile: contrib/Dockerfile.nogui
+      args:
+        MAKE_JOBS: "4"
+    depends_on:
+      equalishcoind:
+        condition: service_healthy
+    user: "1000:1000"
+    restart: "no"
+    environment:
+      COIND_RPC_USER: "${COIND_RPC_USER:-eqlsrpc}"
+      COIND_RPC_PASSWORD: "${COIND_RPC_PASSWORD:-change-me-now}"
+      COIND_RPC_PORT: "${COIND_RPC_PORT:-19902}"
+      BOOTSTRAP_BLOCKS: "${BOOTSTRAP_BLOCKS:-200}"
+    entrypoint:
+      - /bin/bash
+      - -lcx
+      - |
+        set -euo pipefail
+        CLI="equalishcoin-cli -rpcconnect=equalishcoind -rpcport=$${COIND_RPC_PORT} -rpcuser=$${COIND_RPC_USER} -rpcpassword=$${COIND_RPC_PASSWORD}"
+        until $$CLI getblockchaininfo >/dev/null 2>&1; do sleep 2; done
+        if ! $$CLI listwallets | grep -q '"bootstrap"'; then
+          $$CLI createwallet "bootstrap" >/dev/null 2>&1 || $$CLI loadwallet "bootstrap" >/dev/null 2>&1 || true
+        fi
+        ADDR="$$($$CLI -rpcwallet=bootstrap getnewaddress)"
+        for _ in $$(seq 1 "$${BOOTSTRAP_BLOCKS}"); do
+          $$CLI -rpcwallet=bootstrap generatetoaddress 1 "$$ADDR"
+        done
+        echo "Bootstrap mining complete: $${BOOTSTRAP_BLOCKS} blocks"

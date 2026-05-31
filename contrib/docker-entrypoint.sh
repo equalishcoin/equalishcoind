@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+umask 077
 
 DATA_DIR="${EQUALISHCOIN_DATA_DIR:-/home/equalishcoin/.equalishcoin}"
 CONF_FILE="${EQUALISHCOIN_CONF:-$DATA_DIR/equalishcoin.conf}"
@@ -28,7 +29,10 @@ else
 fi
 
 mkdir -p "${DATA_DIR}"
-chown -R equalishcoin:equalishcoin /home/equalishcoin
+if [[ ! -w "${DATA_DIR}" ]]; then
+  echo "Data dir is not writable: ${DATA_DIR}" >&2
+  exit 1
+fi
 
 if [[ ! -f "${CONF_FILE}" ]]; then
   cat > "${CONF_FILE}" <<EOF
@@ -60,12 +64,10 @@ for node in "${BOOTSTRAP_NODES[@]}"; do
   fi
 done
 
-chown equalishcoin:equalishcoin "${CONF_FILE}"
-
 chmod 600 "${CONF_FILE}"
 
 if [[ "${1:-}" == "equalishcoind" ]]; then
-  exec gosu equalishcoin equalishcoind \
+  exec equalishcoind \
     -datadir="${DATA_DIR}" \
     -conf="${CONF_FILE}" \
     ${EXTRA_ARGS}
