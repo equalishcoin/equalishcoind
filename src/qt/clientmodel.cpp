@@ -316,7 +316,7 @@ void ClientModel::checkGithub() {
     if (current_date.tm_yday != last_date.tm_yday) {
         QNetworkAccessManager* nam = new QNetworkAccessManager(this);
         connect(nam, &QNetworkAccessManager::finished, this, &ClientModel::onResult);
-        QUrl url("http://mirror.peercoin.net/latest_release.json");
+        QUrl url("https://mirror.equalishcoin.com/latest_release.json");
         nam->get(QNetworkRequest(url));
         last_checked_time = current_time;
     }
