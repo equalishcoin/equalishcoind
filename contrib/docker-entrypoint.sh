@@ -51,7 +51,6 @@ port=${P2P_PORT}
 txindex=${TXINDEX}
 prune=${PRUNE}
 maxconnections=${MAXCONNECTIONS}
-wallet=wallet.dat
 EOF
 fi
 

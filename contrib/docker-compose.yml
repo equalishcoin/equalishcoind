@@ -20,7 +20,7 @@ services:
       COIND_TXINDEX: "${COIND_TXINDEX:-1}"
       COIND_PRUNE: "${COIND_PRUNE:-0}"
       COIND_MAXCONNECTIONS: "${COIND_MAXCONNECTIONS:-64}"
-      COIND_EXTRA_ARGS: "${COIND_EXTRA_ARGS:-}"
+      COIND_EXTRA_ARGS: "${COIND_EXTRA_ARGS:--wallet=bootstrap}"
     ports:
       - "${COIND_P2P_PORT:-19901}:${COIND_P2P_PORT:-19901}"
       # Uncomment only if you really want host RPC access.
@@ -65,12 +65,32 @@ services:
       - |
         set -euo pipefail
         CLI="equalishcoin-cli -rpcconnect=equalishcoind -rpcport=$${COIND_RPC_PORT} -rpcuser=$${COIND_RPC_USER} -rpcpassword=$${COIND_RPC_PASSWORD}"
-        until $$CLI getblockchaininfo >/dev/null 2>&1; do sleep 2; done
-        if ! $$CLI listwallets | grep -q '"bootstrap"'; then
-          $$CLI createwallet "bootstrap" >/dev/null 2>&1 || $$CLI loadwallet "bootstrap" >/dev/null 2>&1 || true
+
+        rpc_retry() {
+          local attempt=0
+          local max_attempts=30
+          while (( attempt < max_attempts )); do
+            if $$CLI "$@"; then
+              return 0
+            fi
+            attempt=$$((attempt + 1))
+            sleep 1
+          done
+          echo "RPC command failed after $${max_attempts} attempts: $*" >&2
+          return 1
+        }
+
+        until rpc_retry getblockchaininfo >/dev/null 2>&1; do sleep 2; done
+        if ! rpc_retry listwallets | grep -q '"bootstrap"'; then
+          rpc_retry createwallet "bootstrap" >/dev/null 2>&1 || rpc_retry loadwallet "bootstrap" >/dev/null 2>&1 || true
         fi
-        ADDR="$$($$CLI -rpcwallet=bootstrap getnewaddress)"
-        for _ in $$(seq 1 "$${BOOTSTRAP_BLOCKS}"); do
-          $$CLI -rpcwallet=bootstrap generatetoaddress 1 "$$ADDR"
+        ADDR="$$(rpc_retry -rpcwallet=bootstrap getnewaddress | tail -n 1)"
+        START_HEIGHT=$$(rpc_retry getblockchaininfo | grep '"blocks"' | grep -o '[0-9]*')
+        TARGET=$(( START_HEIGHT + $${BOOTSTRAP_BLOCKS} ))
+        echo "Bootstrap mining from height $${START_HEIGHT} to $${TARGET}"
+        while true; do
+          CURRENT=$$(rpc_retry getblockchaininfo | grep '"blocks"' | grep -o '[0-9]*')
+          (( CURRENT >= TARGET )) && break
+          rpc_retry -rpcwallet=bootstrap generatetoaddress 1 "$$ADDR" >/dev/null
         done
-        echo "Bootstrap mining complete: $${BOOTSTRAP_BLOCKS} blocks"
+        echo "Bootstrap mining complete at height $${TARGET}"

@@ -14,6 +14,7 @@
 #include <util/translation.h>
 #include <wallet/context.h>
 #include <wallet/receive.h>
+#include <wallet/rpc/staking.h>
 #include <wallet/rpc/wallet.h>
 #include <wallet/rpc/util.h>
 #include <wallet/wallet.h>
@@ -1206,6 +1207,7 @@ static const CRPCCommand commands[] =
     { "wallet",             &walletpassphrasechange,         },
     { "wallet",             &walletprocesspsbt,              },
     // equalishcoin commands
+    { "wallet",             &getstakinginfo,                 },
     { "wallet",             &importcoinstake,                },
     { "wallet",             &listminting,                    },
     { "wallet",             &reservebalance,                 },

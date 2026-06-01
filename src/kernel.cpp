@@ -408,13 +408,19 @@ static bool GetKernelStakeModifierV05(CBlockIndex* pindexPrev, unsigned int nTim
 
     if (nStakeModifierTime + params.nStakeMinAge - nStakeModifierSelectionInterval <= (int64_t) nTimeTx)
     {
-        // Best block is still more than
-        // (nStakeMinAge minus a selection interval) older than kernel timestamp
-        if (fPrintProofOfStake)
-            return error("GetKernelStakeModifier() : best block %s at height %d too old for stake",
-                pindex->GetBlockHash().ToString(), pindex->nHeight);
-        else
-            return false;
+        // On sparse/isolated chains, the tip may outrun the legacy modifier window.
+        // Falling back to the newest available generated modifier avoids a deadlock
+        // where no kernel hash is produced and staking cannot resume.
+        nStakeModifier = pindex->nStakeModifier;
+        if (fPrintProofOfStake || gArgs.GetBoolArg("-debug", false)) {
+            LogPrintf("GetKernelStakeModifierV05(): fallback to tip modifier=0x%016x height=%d time=%s nTimeTx=%u (window=%lld)\n",
+                nStakeModifier,
+                pindex->nHeight,
+                FormatISO8601DateTime(pindex->GetBlockTime()),
+                nTimeTx,
+                (long long)(params.nStakeMinAge - nStakeModifierSelectionInterval));
+        }
+        return true;
     }
     // loop to find the stake modifier earlier by 
     // (nStakeMinAge minus a selection interval)
@@ -535,6 +541,15 @@ bool CheckStakeKernelHash(unsigned int nBits, CBlockIndex* pindexPrev, const CBl
 {
     const Consensus::Params& params = Params().GetConsensus();
     unsigned int nTimeBlockFrom = blockFrom.GetBlockTime();
+    static int64_t s_last_kernel_target_log = 0;
+    const auto should_log_kernel_target = [&]() {
+        const int64_t now = GetTime();
+        if (now - s_last_kernel_target_log < 60) {
+            return false;
+        }
+        s_last_kernel_target_log = now;
+        return true;
+    };
 
     if (nTimeTx < (txPrev->nTime? txPrev->nTime : nTimeBlockFrom))  // Transaction timestamp violation
         return error("CheckStakeKernelHash() : nTime violation");
@@ -550,6 +565,7 @@ bool CheckStakeKernelHash(unsigned int nBits, CBlockIndex* pindexPrev, const CBl
     // to secure the network when proof-of-stake difficulty is low
     int64_t nTimeWeight = min((int64_t)nTimeTx - (txPrev->nTime? txPrev->nTime : nTimeBlockFrom), params.nStakeMaxAge) - (IsProtocolV03(nTimeTx)? params.nStakeMinAge : 0);
     CBigNum bnCoinDayWeight = CBigNum(nValueIn) * nTimeWeight / COIN / (24 * 60 * 60);
+    CBigNum bnTarget = bnCoinDayWeight * bnTargetPerCoinDay;
     // Calculate hash
     CDataStream ss(SER_GETHASH, 0);
     uint64_t nStakeModifier = 0;
@@ -587,8 +603,30 @@ bool CheckStakeKernelHash(unsigned int nBits, CBlockIndex* pindexPrev, const CBl
     }
 
     // Now check if proof-of-stake hash meets target protocol
-    if (CBigNum(hashProofOfStake) > bnCoinDayWeight * bnTargetPerCoinDay)
+    if (CBigNum(hashProofOfStake) > bnTarget) {
+        if (!fPrintProofOfStake && should_log_kernel_target()) {
+            const CBigNum bnHash = CBigNum(hashProofOfStake);
+            const CBigNum bnTargetGap = bnHash - bnTarget;
+            LogPrintf("CheckStakeKernelHash(): target miss protocol=%s nTimeTx=%u weight=%s target=%s hash=%s nBits=%u block_from_time=%u tx_prev_time=%u prevout=%u\n",
+                IsProtocolV05(nTimeTx)? "0.5" : (IsProtocolV03(nTimeTx)? "0.3" : "0.2"),
+                nTimeTx,
+                bnCoinDayWeight.GetHex(),
+                bnTarget.GetHex(),
+                bnHash.GetHex(),
+                nBits,
+                nTimeBlockFrom,
+                (txPrev->nTime ? txPrev->nTime : nTimeBlockFrom),
+                prevout.n);
+            LogPrintf("CheckStakeKernelHash(): miss details value_in=%ld time_weight=%ld coin_day_weight=%s target_per_coin_day=%s hash_minus_target=%s modifier_or_bits=%s\n",
+                nValueIn,
+                nTimeWeight,
+                bnCoinDayWeight.GetHex(),
+                bnTargetPerCoinDay.GetHex(),
+                bnTargetGap.GetHex(),
+                IsProtocolV03(nTimeTx) ? strprintf("0x%016x", nStakeModifier) : strprintf("0x%08x", nBits));
+        }
         return false;
+    }
     if (gArgs.GetBoolArg("-debug", false) && !fPrintProofOfStake)
     {
         if (IsProtocolV03(nTimeTx)) {

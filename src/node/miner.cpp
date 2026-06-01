@@ -183,10 +183,6 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
                     // as it would be the same as the block timestamp
                     coinbaseTx.vout[0].SetEmpty();
                     coinbaseTx.nTime = txCoinStake.nTime;
-                            // Set PoW coinbase nTime to block time (Peercoin-style)
-                            if (!pblock->IsProofOfStake()) {
-                                coinbaseTx.nTime = pblock->nTime;
-                            }
                     pblock->vtx.push_back(MakeTransactionRef(CTransaction(txCoinStake)));
                     *pfPoSCancel = false;
                 }
@@ -553,12 +549,20 @@ void PoSMiner(NodeContext& m_node)
     }
 
     CConnman* connman = m_node.connman.get();
-    CWallet* pwallet;
+    CWallet* pwallet{nullptr};
     // ppctodo: deal with multiple wallets better
-    if (m_node.wallet_loader->getWallets().size() && gArgs.GetBoolArg("-minting", true))
-        pwallet = m_node.wallet_loader->getWallets()[0]->wallet();
-    else
+    while (!ShutdownRequested() && gArgs.GetBoolArg("-minting", true)) {
+        if (m_node.wallet_loader->getWallets().size()) {
+            pwallet = m_node.wallet_loader->getWallets()[0]->wallet();
+            break;
+        }
+        if (connman && !connman->interruptNet.sleep_for(std::chrono::seconds(1))) {
+            return;
+        }
+    }
+    if (pwallet == nullptr) {
         return;
+    }
 
     LogPrintf("CPUMiner started for proof-of-stake\n");
     util::ThreadRename("peercoin-stake-minter");
@@ -605,14 +609,14 @@ void PoSMiner(NodeContext& m_node)
                     return;
             }
 
-            if (Params().MiningRequiresPeers()) {
-                // Busy-wait for the network to come online so we don't waste time mining
-                // on an obsolete chain. In regtest mode we expect to fly solo.
-                while(connman == nullptr || connman->GetNodeCount(ConnectionDirection::Both) == 0 || m_node.chainman->ActiveChainstate().IsInitialBlockDownload()) {
-                    while(connman == nullptr) {UninterruptibleSleep(1s);}
-                    if (!connman->interruptNet.sleep_for(std::chrono::seconds(10)))
-                        return;
-                    }
+            // Allow isolated-chain staking once IBD has completed.
+            while (connman == nullptr || m_node.chainman->ActiveChainstate().IsInitialBlockDownload()) {
+                while (connman == nullptr) {
+                    UninterruptibleSleep(1s);
+                }
+                if (!connman->interruptNet.sleep_for(std::chrono::seconds(10))) {
+                    return;
+                }
             }
             CBlockIndex* pindexPrev;
             {

@@ -3587,6 +3587,23 @@ typedef std::vector<unsigned char> valtype;
 bool CWallet::CreateCoinStake(ChainstateManager& chainman, const CWallet* pwallet, unsigned int nBits, int64_t nSearchInterval, CMutableTransaction& txNew, CTxDestination destination)
 {
     bool bDebug = (gArgs.GetBoolArg("-debug", false) && gArgs.GetBoolArg("-printcoinstake", false));
+    static int64_t s_last_stake_search_log = 0;
+    static constexpr size_t kClosestMissWindow = 30;
+    static size_t s_window_samples = 0;
+    static bool s_window_have_best = false;
+    static CBigNum s_window_best_gap;
+    static uint32_t s_window_best_time = 0;
+    static bool s_global_have_best = false;
+    static CBigNum s_global_best_gap;
+    static uint32_t s_global_best_time = 0;
+    const auto should_log_stake_search = [&]() {
+        const int64_t now = GetTime();
+        if (now - s_last_stake_search_log < 60) {
+            return false;
+        }
+        s_last_stake_search_log = now;
+        return true;
+    };
 
     // if there are pre signed coinstakes, we'll use them for minting
     if (m_coinstakes.size()) {
@@ -3652,13 +3669,40 @@ bool CWallet::CreateCoinStake(ChainstateManager& chainman, const CWallet* pwalle
 
     util::Result<SelectionResult> result = SelectCoins(*pwallet, availableCoins, /*pre_set_inputs=*/ {}, nAllowedBalance, temp, coin_selection_params);
 
-    if (!result)
+    if (!result) {
+        if (should_log_stake_search()) {
+            LogPrintf("CreateCoinStake(): coin selection failed available=%u total=%s allowed=%s reserve=%s search_interval=%d\n",
+                availableCoins.Size(),
+                FormatMoney(availableCoins.GetTotalAmount()),
+                FormatMoney(nAllowedBalance),
+                nReserveBalance ? FormatMoney(*nReserveBalance) : "0",
+                nSearchInterval);
+        }
         return false;
+    }
 
     CAmount nCredit = 0;
     CScript scriptPubKeyKernel;
     CScript scriptPubKeyOut;
     bool bMinterKey = false;
+    size_t eligible_kernel_coins = 0;
+    size_t kernel_checks = 0;
+    size_t selected_coins = result->GetInputSet().size();
+    bool kernel_found = false;
+    size_t time_violations = 0;
+    size_t min_age_violations = 0;
+    size_t nonpositive_time_weight = 0;
+    size_t likely_target_misses = 0;
+    size_t prehash_failures = 0;
+    bool have_best_miss = false;
+    CBigNum best_miss_gap;
+    uint32_t best_miss_time = 0;
+    CAmount best_miss_value_in = 0;
+    int64_t best_miss_time_weight = 0;
+    CBigNum best_miss_coin_day_weight;
+    CBigNum best_miss_target_per_coin_day;
+    CBigNum best_miss_hash;
+    unsigned int best_miss_nBits = nBits;
 
     for (const auto& pcoin : result->GetInputSet())
     {
@@ -3689,15 +3733,39 @@ bool CWallet::CreateCoinStake(ChainstateManager& chainman, const CWallet* pwalle
         if (header.GetBlockTime() + params.nStakeMinAge > txNew.nTime - nMaxStakeSearchInterval)
             continue; // only count coins meeting min age requirement
 
+        ++eligible_kernel_coins;
+
         bool fKernelFound = false;
         for (unsigned int n=0; n<std::min(nSearchInterval,(int64_t)nMaxStakeSearchInterval) && !fKernelFound; n++)
         {
+            ++kernel_checks;
             // Search backward in time from the given txNew timestamp
             // Search nSearchInterval seconds back up to nMaxStakeSearchInterval
+            const uint32_t candidate_time = txNew.nTime - n;
+            const int64_t nTimeBlockFrom = header.GetBlockTime();
+            if (nTimeBlockFrom > candidate_time) {
+                ++time_violations;
+                continue;
+            }
+            if (nTimeBlockFrom + params.nStakeMinAge > candidate_time) {
+                ++min_age_violations;
+                continue;
+            }
+            const int64_t nTimeTxPrev = tx->nTime ? tx->nTime : nTimeBlockFrom;
+            const int64_t nTimeWeight = std::min<int64_t>(candidate_time - nTimeTxPrev, params.nStakeMaxAge) -
+                (IsProtocolV03(candidate_time) ? params.nStakeMinAge : 0);
+            if (nTimeWeight <= 0) {
+                ++nonpositive_time_weight;
+                continue;
+            }
+            const CAmount nValueIn = pcoin->txout.nValue;
+            const CBigNum bnCoinDayWeight = CBigNum(nValueIn) * nTimeWeight / COIN / (24 * 60 * 60);
+
             uint256 hashProofOfStake = uint256();
             COutPoint prevoutStake = pcoin->outpoint;
-            if (CheckStakeKernelHash(nBits, chainman.ActiveChain().Tip(), header, postx.nTxOffset + CBlockHeader::NORMAL_SERIALIZE_SIZE, tx, prevoutStake, txNew.nTime - n, hashProofOfStake, false, chainman.ActiveChainstate()))
+            if (CheckStakeKernelHash(nBits, chainman.ActiveChain().Tip(), header, postx.nTxOffset + CBlockHeader::NORMAL_SERIALIZE_SIZE, tx, prevoutStake, candidate_time, hashProofOfStake, false, chainman.ActiveChainstate()))
             {
+                kernel_found = true;
                 // Found a kernel
                 if (bDebug)
                     LogPrintf("CreateCoinStake : kernel found\n");
@@ -3789,12 +3857,82 @@ bool CWallet::CreateCoinStake(ChainstateManager& chainman, const CWallet* pwalle
                 fKernelFound = true;
                 break;
             }
+            const CBigNum bnHash = CBigNum(hashProofOfStake);
+            if (hashProofOfStake.IsNull()) {
+                ++prehash_failures;
+                continue;
+            }
+            ++likely_target_misses;
+            const CBigNum bnGap = bnHash - (bnCoinDayWeight * bnTargetPerCoinDay);
+            if (!have_best_miss || bnGap < best_miss_gap) {
+                have_best_miss = true;
+                best_miss_gap = bnGap;
+                best_miss_time = candidate_time;
+                best_miss_value_in = nValueIn;
+                best_miss_time_weight = nTimeWeight;
+                best_miss_coin_day_weight = bnCoinDayWeight;
+                best_miss_target_per_coin_day = bnTargetPerCoinDay;
+                best_miss_hash = bnHash;
+                best_miss_nBits = nBits;
+            }
         }
         if (fKernelFound)
             break; // if kernel is found stop searching
     }
-    if (nCredit == 0 || nCredit > nAllowedBalance)
+    if (nCredit == 0 || nCredit > nAllowedBalance) {
+        if (should_log_stake_search()) {
+            LogPrintf("CreateCoinStake(): no kernel selected available=%u selected=%u eligible=%u kernel_checks=%u search_interval=%d tx_time=%u tip_height=%d allowed=%s fail_breakdown={time_violation:%u min_age:%u nonpositive_weight:%u prehash_failure:%u target_miss:%u}\n",
+                availableCoins.Size(),
+                selected_coins,
+                eligible_kernel_coins,
+                kernel_checks,
+                nSearchInterval,
+                txNew.nTime,
+                chainman.ActiveChain().Tip() ? chainman.ActiveChain().Tip()->nHeight : -1,
+                FormatMoney(nAllowedBalance),
+                time_violations,
+                min_age_violations,
+                nonpositive_time_weight,
+                prehash_failures,
+                likely_target_misses);
+            if (have_best_miss) {
+                if (!s_window_have_best || best_miss_gap < s_window_best_gap) {
+                    s_window_have_best = true;
+                    s_window_best_gap = best_miss_gap;
+                    s_window_best_time = best_miss_time;
+                }
+                if (!s_global_have_best || best_miss_gap < s_global_best_gap) {
+                    s_global_have_best = true;
+                    s_global_best_gap = best_miss_gap;
+                    s_global_best_time = best_miss_time;
+                }
+                ++s_window_samples;
+                LogPrintf("CreateCoinStake(): closest miss time=%u value_in=%s time_weight=%ld coin_day_weight=%s target_per_coin_day=%s hash=%s gap=%s modifier_or_bits=%s\n",
+                    best_miss_time,
+                    FormatMoney(best_miss_value_in),
+                    best_miss_time_weight,
+                    best_miss_coin_day_weight.GetHex(),
+                    best_miss_target_per_coin_day.GetHex(),
+                    best_miss_hash.GetHex(),
+                    best_miss_gap.GetHex(),
+                    strprintf("0x%08x", best_miss_nBits));
+                if (s_window_have_best && s_global_have_best) {
+                    LogPrintf("CreateCoinStake(): closest miss rolling window=%u/%u window_best_gap=%s window_best_time=%u global_best_gap=%s global_best_time=%u\n",
+                        s_window_samples,
+                        (unsigned int)kClosestMissWindow,
+                        s_window_best_gap.GetHex(),
+                        s_window_best_time,
+                        s_global_best_gap.GetHex(),
+                        s_global_best_time);
+                }
+                if (s_window_samples >= kClosestMissWindow) {
+                    s_window_samples = 0;
+                    s_window_have_best = false;
+                }
+            }
+        }
         return false;
+    }
 
     // rfc28 precalculation
     int maxMintingUtxos = gArgs.GetIntArg("-maxmintingutxos", MAX_MINTING_UTXOS);
@@ -3980,6 +4118,12 @@ bool CWallet::CreateCoinStake(ChainstateManager& chainman, const CWallet* pwalle
     }
 
     // Successfully generated coinstake
+    if (!bDebug && kernel_found) {
+        LogPrintf("CreateCoinStake(): kernel selected vin=%u credit=%s time=%u\n",
+            txNew.vin.size(),
+            FormatMoney(nCredit),
+            txNew.nTime);
+    }
     return true;
 }
 
