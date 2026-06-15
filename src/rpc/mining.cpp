@@ -667,9 +667,11 @@ static RPCHelpMan getblocktemplate()
     if (strMode != "template")
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid mode");
 
+    const bool gbt_allow_disconnected = gArgs.GetBoolArg("-gbtallowdisconnected", false);
+
     if (!chainman.GetParams().IsTestChain()) {
         const CConnman& connman = EnsureConnman(node);
-        if (connman.GetNodeCount(ConnectionDirection::Both) == 0) {
+        if (!gbt_allow_disconnected && connman.GetNodeCount(ConnectionDirection::Both) == 0) {
             throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, PACKAGE_NAME " is not connected!");
         }
 

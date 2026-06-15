@@ -95,8 +95,9 @@ bool IsProtocolV06(const CBlockIndex* pindexPrev)
   // Soft-forking PoS can be dangerous if the super majority is too low
   // The stake majority will decrease after the fork
   // since only coindays of updated nodes will get destroyed.
-  if ((Params().NetworkIDString() == CBaseChainParams::MAIN && pindexPrev->nHeight > 339678) ||
-      (Params().NetworkIDString() != CBaseChainParams::MAIN && pindexPrev->nHeight > 301251))
+    // Fork launch: enable v06 immediately after genesis.
+    if ((Params().NetworkIDString() == CBaseChainParams::MAIN && pindexPrev->nHeight > 0) ||
+            (Params().NetworkIDString() != CBaseChainParams::MAIN && pindexPrev->nHeight > 0))
     return true;
 
   return false;
@@ -145,8 +146,9 @@ bool IsProtocolV14(const CBlockIndex* pindexPrev)
   if (pindexPrev->nTime < (Params().NetworkIDString() != CBaseChainParams::MAIN ? nProtocolV14TestSwitchTime : nProtocolV14SwitchTime))
       return false;
 
-  if ((Params().NetworkIDString() == CBaseChainParams::MAIN && pindexPrev->nHeight > 770395) ||
-      (Params().NetworkIDString() != CBaseChainParams::MAIN && pindexPrev->nHeight > 573706))
+    // Fork launch: enable v14 early while still requiring a few pre-v14 blocks.
+    if ((Params().NetworkIDString() == CBaseChainParams::MAIN && pindexPrev->nHeight > 1000000) ||
+            (Params().NetworkIDString() != CBaseChainParams::MAIN && pindexPrev->nHeight > 1000000))
     return true;
 
   return false;
@@ -161,6 +163,8 @@ bool IsProtocolV15(const CBlockIndex* pindexPrev)
   if (pindexPrev->nTime < (Params().NetworkIDString() != CBaseChainParams::MAIN ? nProtocolV15TestSwitchTime : nProtocolV15SwitchTime))
       return false;
 
+    // Keep v15 on legacy activation heights for now until its full rollout
+    // (including script-flag behavior) is explicitly validated for this fork.
   if ((Params().NetworkIDString() == CBaseChainParams::MAIN && pindexPrev->nHeight > 801330) ||
       (Params().NetworkIDString() != CBaseChainParams::MAIN && pindexPrev->nHeight > 612775))
     return true;

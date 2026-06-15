@@ -171,3 +171,5 @@ dist/
 /guix-build-*
 
 /ci/scratch/
+
+contrib/dot-equalishcoin

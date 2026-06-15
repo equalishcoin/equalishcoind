@@ -20,11 +20,11 @@ services:
       COIND_TXINDEX: "${COIND_TXINDEX:-1}"
       COIND_PRUNE: "${COIND_PRUNE:-0}"
       COIND_MAXCONNECTIONS: "${COIND_MAXCONNECTIONS:-64}"
-      COIND_EXTRA_ARGS: "${COIND_EXTRA_ARGS:--wallet=bootstrap}"
+      COIND_EXTRA_ARGS: "${COIND_EXTRA_ARGS:--wallet=bootstrap -gbtallowdisconnected}"
     ports:
       - "${COIND_P2P_PORT:-19901}:${COIND_P2P_PORT:-19901}"
       # Uncomment only if you really want host RPC access.
-      # - "${COIND_RPC_PORT:-19902}:${COIND_RPC_PORT:-19902}"
+      - "${COIND_RPC_PORT:-19902}:${COIND_RPC_PORT:-19902}"
     expose:
       - "${COIND_P2P_PORT:-19901}"
       - "${COIND_RPC_PORT:-19902}"
@@ -84,7 +84,39 @@ services:
         if ! rpc_retry listwallets | grep -q '"bootstrap"'; then
           rpc_retry createwallet "bootstrap" >/dev/null 2>&1 || rpc_retry loadwallet "bootstrap" >/dev/null 2>&1 || true
         fi
-        ADDR="$$(rpc_retry -rpcwallet=bootstrap getnewaddress | tail -n 1)"
+
+        choose_mining_addr() {
+          rpc_retry -rpcwallet=bootstrap listunspent 1 9999999 | awk '
+            /"address"[[:space:]]*:/ {
+              addr=$$2
+              gsub(/[",]/, "", addr)
+            }
+            /"amount"[[:space:]]*:/ {
+              amt=$$2
+              gsub(/,/, "", amt)
+              if (addr != "") {
+                sum[addr] += amt + 0
+                if (sum[addr] > max) {
+                  max = sum[addr]
+                  best = addr
+                }
+              }
+            }
+            END {
+              if (best != "") print best
+            }
+          '
+        }
+
+        #ADDR="$$(choose_mining_addr | tail -n 1)"
+        ADDR="EJC8HmrF1bqMMiGy5Xeq3SpxATKHRHBimu"
+        if [[ -z "$$ADDR" ]]; then
+          ADDR="$$(rpc_retry -rpcwallet=bootstrap getnewaddress | tail -n 1)"
+          echo "No funded wallet address found; generated new bootstrap address: $$ADDR"
+        else
+          echo "Using richest wallet address for bootstrap mining: $$ADDR"
+        fi
+
         START_HEIGHT=$$(rpc_retry getblockchaininfo | grep '"blocks"' | grep -o '[0-9]*')
         TARGET=$(( START_HEIGHT + $${BOOTSTRAP_BLOCKS} ))
         echo "Bootstrap mining from height $${START_HEIGHT} to $${TARGET}"

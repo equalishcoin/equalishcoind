@@ -276,6 +276,29 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
     if (pindexPrevPrev->pprev == nullptr)
         return UintToArith256(params.bnInitialHashTarget).GetCompact(); // second block
 
+    // Bootstrap safety valve: if PoW has been absent for too long, relax only
+    // the next PoW target by a bounded factor. This helps recovery at very low
+    // hash rates without permanently pinning to powLimit.
+    if (!fProofOfStake && !IsProtocolV14(pindexPrev) &&
+        Params().NetworkIDString() != CBaseChainParams::REGTEST &&
+        pindexLast->nHeight < 200000) {
+        const int64_t pow_gap = pindexLast->GetBlockTime() - pindexPrev->GetBlockTime();
+        const int64_t emergency_gap = params.nTargetSpacingWorkMax;
+        if (pow_gap > emergency_gap) {
+            int64_t ease_factor = pow_gap / emergency_gap;
+            if (ease_factor < 2) ease_factor = 2;
+            if (ease_factor > 8) ease_factor = 8;
+
+            CBigNum bnEmergency;
+            bnEmergency.SetCompact(pindexPrev->nBits);
+            bnEmergency *= ease_factor;
+            if (bnEmergency > CBigNum(params.powLimit)) {
+                bnEmergency = CBigNum(params.powLimit);
+            }
+            return bnEmergency.GetCompact();
+        }
+    }
+
     if (!fProofOfStake && IsProtocolV14(pindexPrev))
         return GetNextASERTWorkRequired(pindexPrev, pindexLast, params);
 
