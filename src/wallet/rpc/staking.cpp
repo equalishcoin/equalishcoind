@@ -117,10 +117,14 @@ RPCHelpMan getstakinginfo()
             const int64_t net_stake_weight = difficulty > 0.0 ? static_cast<int64_t>(difficulty * static_cast<double>(uint64_t{1} << 32)) : 0;
             const bool staking_active = enabled && wallet_unlocked && wallet_weight > 0 && !syncing;
 
+            // expected_time: best-effort RPC estimate of time until next stake.
+            // Historically this used net_stake_weight (difficulty*2^32) divided by
+            // wallet_effective_weight (satoshi-days), which mixes incompatible
+            // units and produced unrealistic estimates. Prefer the kernel-based
+            // estimate below (`expected_time_kernel`) which uses coin-day units
+            // consistently. Fallback to the legacy formula only if kernel-based
+            // values are unavailable.
             int64_t expected_time{0};
-            if (staking_active && wallet_effective_weight > 0 && net_stake_weight > 0) {
-                expected_time = static_cast<int64_t>((static_cast<double>(net_stake_weight) / static_cast<double>(wallet_effective_weight)) * Params().GetConsensus().nStakeTargetSpacing);
-            }
 
             double kernel_rate{0.0};
             int64_t expected_time_kernel{0};
@@ -148,6 +152,18 @@ RPCHelpMan getstakinginfo()
                         prob_nohit_8h = std::exp(-static_cast<double>(lambda * (8.0L * 3600.0L)));
                         prob_nohit_12h = std::exp(-static_cast<double>(lambda * (12.0L * 3600.0L)));
                     }
+                }
+            }
+
+            // Choose the most consistent expected-time estimate available.
+            if (staking_active) {
+                if (expected_time_kernel > 0) {
+                    expected_time = expected_time_kernel;
+                } else if (wallet_effective_weight > 0 && net_stake_weight > 0) {
+                    // Legacy fallback: legacy formula mixes difficulty*2^32 with
+                    // wallet_effective_weight (satoshi-days). Keep as fallback
+                    // for compatibility, but prefer kernel-based estimate above.
+                    expected_time = static_cast<int64_t>((static_cast<double>(net_stake_weight) / static_cast<double>(wallet_effective_weight)) * Params().GetConsensus().nStakeTargetSpacing);
                 }
             }
 
