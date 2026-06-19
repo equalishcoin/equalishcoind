@@ -71,33 +71,43 @@ static UniValue GetNetworkHashPS(int lookup, int height, const CChain& active_ch
     if (pb == nullptr || !pb->nHeight)
         return 0;
 
-    //ppcTODO - redo this to fit peercoin
-    // If lookup is -1, then use blocks since last difficulty change.
-//    if (lookup <= 0)
-//        lookup = pb->nHeight % Params().GetConsensus().DifficultyAdjustmentInterval() + 1;
-
     // If lookup is larger than chain, then set it to chain length.
     if (lookup > pb->nHeight)
         lookup = pb->nHeight;
 
-    const CBlockIndex* pb0 = pb;
-    int64_t minTime = pb0->GetBlockTime();
-    int64_t maxTime = minTime;
-    for (int i = 0; i < lookup; i++) {
-        pb0 = pb0->pprev;
-        int64_t time = pb0->GetBlockTime();
-        minTime = std::min(time, minTime);
-        maxTime = std::max(time, maxTime);
+    // Sum PoW-only work across the last 'lookup' PoW blocks.
+    arith_uint256 totalWork = 0;
+    int counted = 0;
+    int64_t minTime = 0;
+    int64_t maxTime = 0;
+    const CBlockIndex* pindexIter = pb;
+    while (pindexIter && counted < lookup) {
+        if (pindexIter->IsProofOfWork()) {
+            bool fNegative = false;
+            bool fOverflow = false;
+            arith_uint256 bnTarget;
+            bnTarget.SetCompact(pindexIter->nBits, &fNegative, &fOverflow);
+            if (!fNegative && !fOverflow && bnTarget != 0) {
+                arith_uint256 work = (~bnTarget / (bnTarget + 1)) + 1;
+                totalWork += work;
+                int64_t t = pindexIter->GetBlockTime();
+                if (counted == 0) {
+                    minTime = maxTime = t;
+                } else {
+                    minTime = std::min(minTime, t);
+                    maxTime = std::max(maxTime, t);
+                }
+                counted++;
+            }
+        }
+        pindexIter = pindexIter->pprev;
     }
 
-    // In case there's a situation where minTime == maxTime, we don't want a divide by zero exception.
-    if (minTime == maxTime)
+    if (counted < 1 || minTime == maxTime)
         return 0;
 
-    arith_uint256 workDiff = pb->nChainTrust - pb0->nChainTrust;
     int64_t timeDiff = maxTime - minTime;
-
-    return workDiff.getdouble() / timeDiff;
+    return totalWork.getdouble() / timeDiff;
 }
 
 static RPCHelpMan getnetworkhashps()

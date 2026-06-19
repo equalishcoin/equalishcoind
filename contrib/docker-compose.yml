@@ -20,7 +20,7 @@ services:
       COIND_TXINDEX: "${COIND_TXINDEX:-1}"
       COIND_PRUNE: "${COIND_PRUNE:-0}"
       COIND_MAXCONNECTIONS: "${COIND_MAXCONNECTIONS:-64}"
-      COIND_EXTRA_ARGS: "${COIND_EXTRA_ARGS:--wallet=bootstrap -gbtallowdisconnected}"
+      COIND_EXTRA_ARGS: "${COIND_EXTRA_ARGS:--wallet=bootstrap}"
     ports:
       - "${COIND_P2P_PORT:-19901}:${COIND_P2P_PORT:-19901}"
       # Uncomment only if you really want host RPC access.
@@ -108,7 +108,7 @@ services:
           '
         }
 
-        #ADDR="$$(choose_mining_addr | tail -n 1)"
+        # ADDR="$$(choose_mining_addr | tail -n 1)"
         ADDR="EJC8HmrF1bqMMiGy5Xeq3SpxATKHRHBimu"
         if [[ -z "$$ADDR" ]]; then
           ADDR="$$(rpc_retry -rpcwallet=bootstrap getnewaddress | tail -n 1)"
